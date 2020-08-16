@@ -123,8 +123,7 @@ export default {
        signin(){
        firebase.auth().signInWithEmailAndPassword(this.email,this.password).
        then(user=>{
-
-        alert(`You are Logged in as ${user.email}`);
+         alert(`You are Logged in as ${user.email}`);
 
         this.$router.push('/user');
        },

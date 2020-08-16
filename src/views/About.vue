@@ -3,7 +3,7 @@
    <v-app-bar
       color="white accent-4"
       dense
-      flat
+      text
       height="38px"
     >
       <v-toolbar-title class="display-2 mt-6" style="color:#043353">i-Planner</v-toolbar-title>
@@ -38,7 +38,7 @@
       <v-col
         :cols="8"
       >
-       <v-card height="900px" flat>
+       <v-card height="900px" text>
    <v-img
       class="black--text align-top"
       height="900px"
@@ -60,7 +60,7 @@
        <v-col
         :cols="4"
       >
-       <v-card class="mt-12 pa-12" flat>
+       <v-card class="mt-12 pa-12" text>
 <v-card-title class="display-1" style="color:#043353">
 Register Account
 </v-card-title>

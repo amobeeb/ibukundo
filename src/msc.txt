@@ -1,4 +1,84 @@
-<template>
+ <router-link class="secondary-content" 
+      v-bind:to="{ name: 'taskdetails',
+       params: { task_id: task.task_id }}"><v-icon> edit</v-icon></router-link>
+       ///
+
+       grey lighten-4 fill-height"
+       ///
+           v-for="task in tasks">
+  <v-flex xs12 md6 :key="task.id">
+    <v-hover v-slot:default="{ hover }">
+        <v-card
+          :elevation="hover ? 12 : 2"
+          class="ma-2"
+          max-width="550"
+         :class="{ 'on-hover': hover }"
+
+        >
+         <div> {{task.task_id}} {{task.title}}</div>
+         <div class="caption mt-5"> <v-icon>today</v-icon>{{task.due}}</div>
+          <v-row
+          align="center"
+          justify="end"
+        >
+      <router-link class="secondary-content" 
+      v-bind:to="{ name: 'taskdetails',
+       params: { task_id: task.task_id }}"><v-icon> edit</v-icon></router-link>
+        </v-row>
+        </v-card>
+        
+      
+    </v-hover>
+  </v-flex>
+      </template>
+      ///
+      //////////////
+       var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           db.collection('users').doc(user.uid).collection('tasks').orderBy('title').get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'task_id': doc.data().task_id,
+                 'title':doc.data().title,
+                 'priority':doc.data().priority,
+                 'due':doc.data().due
+                 
+               }
+               this.tasks.push(data);
+             })
+           }) 
+
+
+
+
+
+
+           ////////////////////////////
+
+            created(){
+            var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           db.collection('users').doc(user.uid).collection('boards').where('slug','==', this.$route.params.slug).get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'boardname': doc.data().boardname,
+                 'slug':doc.data().slug
+                 
+               }
+               this.bid=doc.data().slug
+               this.bidcontainer=this.bid
+               this.boards.push(data);
+               console.log(doc.data().slug);
+                console.log(this.bid);
+             })
+           }) 
+  },
+
+
+  //////////////////////////////////////////////
+  <template>
  <div id="app">
   <v-app id="inspire">
     <v-app-bar
@@ -89,30 +169,30 @@
     <v-container class="my-5" fluid>
     <v-slide-y-transition mode="out-in">
       <v-layout row align-left wrap>
-        <v-flex sm3 v-for="board in boards" :key="board.slug" pa-1>
+        <v-flex xs12><h2> {{boardname}} </h2></v-flex>
+        <v-flex sm3 v-for="list in lists" :key="list.listname" pa-1>
           <v-card>
             <v-card-title primary-title>
               <div class="headline">
-                {{board.boardname}}
+                {{list.listname}}
               </div>
             </v-card-title>
             <v-card-actions>
-              <router-link v-bind:to="{ name: 'boards', params: {slug: board.slug }}">
-              <v-btn text> GO</v-btn></router-link>
+              <v-btn color="primary" text>G0</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
         <v-flex sm3 pa-2>
           <v-card width="300px">
-            <v-card-title primary-title style="flex-direction:column">
-              <div class="headline">Create Boards</div>
+           <v-card-title primary-title style="flex-direction:column">
+              <div class="headline">Create lists</div>
               <div><v-form>
-                <v-text-field v-model="boardname" title="name" required></v-text-field>
+                <v-text-field v-model="listname" title="name" required></v-text-field>
               </v-form>
               </div>
             </v-card-title>
             <v-card-actions>
-              <v-btn text color="secondary" class="ma-auto" @click="createboard">Create</v-btn>
+              <v-btn text color="secondary" class="ma-auto" @click="createlist">Create</v-btn>
             </v-card-actions>
 
           </v-card>
@@ -120,7 +200,7 @@
 
       </v-layout>
     </v-slide-y-transition>
-
+  <v-btn text>Testing</v-btn>
     <template>
      <v-row justify="end" ma-2>
        <v-dialog v-model="dialog" persistent max-width="600px">
@@ -202,20 +282,21 @@
 import firebase from "../firebase";
 import 'firebase/auth'
 const db = firebase.firestore();
-//import draggable from 'vuedraggable'
 export default {
-
+name: 'board2',
   data(){
     return{
     drawer: false,
     dialog: false,
     title:'',
-    task_id:'',
+    boardname:null,
+    slug:'',
     priority:null,
-    boardname:'',
-    due:null,
-    slug:null,
+    listname:'',
     bid:'',
+    bidcontainer:'',
+    lid:'',
+    due:null,
     username:'',
     isloggedin:false,
     loading:false,
@@ -228,15 +309,59 @@ export default {
       
     ],
 
-    tasks:[],
     boards:[],
+    tasks:[],
+    lists:[],
     inprogresstasks:[],
     completedtasks:[],
     
     }
     
   },
+    beforeRouteEnter(to,from,next){
+         var user = firebase.auth().currentUser;
+      db.collection('users').doc(user.uid).collection('boards').where('slug', '==', to.params.slug).get()
+      .then(querySnapshot=>{
+          querySnapshot.forEach(doc=>{
+              next(vm=>{
+                  vm.boardname=doc.data().boardname
+                  vm.bid=doc.data().slug
+                  })
+                  })
+                  })
+    },
+    watch:{
+        '$route': 'fetchdata'
+    },
+     
   methods:{
+       fetchdata(){
+            var user = firebase.auth().currentUser;
+             db.collection('users').doc(user.uid).collection('boards').where('slug','==', this.$route.params.slug).get()
+             .then(querySnapshot=>{
+                 querySnapshot.forEach(doc=>{
+                     this.boardname=doc.data().boardname
+                     this.slug=doc.data().slug
+                     this.bid=doc.data().slug
+                     
+                 })
+             })
+        },
+    testing(){
+       var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           db.collection('users').doc(user.uid).collection('boards').doc(this.bidcontainer).collection('lists').orderBy('boardname').get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'boardname': doc.data().boardname,
+                 'slug':doc.data().slug
+                 
+               }
+               this.boards.push(data);
+               console.log(doc.data().slug);
+             })
+           })  
+    },
           addTask(){
        var user = firebase.auth().currentUser;
        if(user && this.title!=""){
@@ -256,16 +381,16 @@ export default {
                 this.due=''
        }
           },
-          createboard(){
-            this.bid=this.generateUUID()
+          createlist(){
             var user=firebase.auth().currentUser;
-            if(user &&this.boardname!=''){
-              db.collection('users').doc(user.uid).collection('boards').doc(this.bid).set({
-                boardname:this.boardname,
-                 slug: this.bid
-                 
+            this.lid=this.generateUUID()
+            if(user &&this.listname!=''){
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.lid).set({
+                listname:this.listname,
+                slug:this.lid
               })
-              this.boardname=''
+              this.listname=''
+             
               
             }
           },
@@ -277,7 +402,8 @@ export default {
             }
             );
           },
-          generateUUID () {
+          
+         generateUUID () {
           let d = new Date().getTime()
           let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             let r = (d + Math.random() * 16) % 16 | 0
@@ -298,25 +424,7 @@ export default {
 
           }
   },
-  created(){
-
-          
-
-           var user = firebase.auth().currentUser;
-           this.currentUser=firebase.auth().currentUser.email;
-           db.collection('users').doc(user.uid).collection('boards').orderBy('boardname').get().then(querySnapshot=>{
-             querySnapshot.forEach(doc=>{
-               const data={
-                 'id':doc.id,
-                 'boardname': doc.data().boardname,
-                 'slug':doc.data().slug
-                 
-               }
-               this.boards.push(data);
-               console.log(doc.data().slug);
-             })
-           })  
-  },
+ 
   
 };
   

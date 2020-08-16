@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import About from '../views/About.vue'
 import user from '../views/user.vue'
 import note from '../views/notes.vue'
+import boards from '../views/boards.vue'
 import taskdetails from '../views/taskdetails.vue'
 import notedetails from '../views/notedetails.vue'
 import firebase from 'firebase'
@@ -52,6 +53,14 @@ Vue.use(VueRouter)
     path: '/:task_id',
     name: 'taskdetails',
     component: taskdetails,
+    meta:{
+      requiresAuth:true
+    }
+  },
+  {
+    path: '/:slug',
+    name: 'boards',
+    component:boards,
     meta:{
       requiresAuth:true
     }

@@ -120,7 +120,7 @@
          <v-text-field
       class="ml-5 mb-5"
         solo-inverted
-        flat
+        text
         hide-details
         label="Search all notes and notes"
         prepend-inner-icon="search"
