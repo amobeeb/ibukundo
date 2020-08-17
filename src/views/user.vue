@@ -278,12 +278,7 @@ export default {
             );
           },
           generateUUID () {
-          let d = new Date().getTime()
-          let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            let r = (d + Math.random() * 16) % 16 | 0
-            d = Math.floor(d / 16)
-            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
-          })
+          let uuid = Math.floor(100000 + Math.random() * 900000).toString()
           return uuid
         },
           del(doc){
@@ -299,9 +294,6 @@ export default {
           }
   },
   created(){
-
-          
-
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
            db.collection('users').doc(user.uid).collection('boards').orderBy('boardname').get().then(querySnapshot=>{
