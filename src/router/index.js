@@ -7,13 +7,15 @@ import note from '../views/notes.vue'
 import boards from '../views/boards.vue'
 import taskdetails from '../views/taskdetails.vue'
 import notedetails from '../views/notedetails.vue'
-import firebase from 'firebase'
+// import firebase from 'firebase'
 
 
 
 Vue.use(VueRouter)
-
-  const routes = [
+export default new VueRouter({
+  mode:'history',
+  base:process.env.BASE_URL,
+ routes : [
   {
     path: '/',
     name: 'Home',
@@ -76,37 +78,5 @@ Vue.use(VueRouter)
 }  
 ]
 
-const router = new VueRouter({
-  routes
 })
 
-
-
-router.beforeEach((to,from,next)=>{
-  if(to.matched.some(record=>record.meta.requiresAuth)){
-    if(!firebase.auth().currentUser){
-      next({
-        path:'/',
-        query:{ redirect:to.fullPath}
-      })
-    }
-    else{
-      next();
-    }
-  }
-  else if(to.matched.some(record=>record.meta.requiresGuest)){
-    if(firebase.auth().currentUser){
-      next({
-        path:'/user',
-        query:{ redirect:to.fullPath}
-      })
-    }
-    else{
-      next();
-    }
-  }
-  else{
-    next();
-  }
-})
-export default router;

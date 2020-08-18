@@ -237,6 +237,22 @@ export default {
     
   },
   methods:{
+
+    fetchdata(){
+      var user =firebase.auth().currentUser;
+      this.currentUser=firebase.auth().currentUser.email;
+      db.collection('users').doc(user.uid).collection('boards').orderBy('boardname').get().then(querySnapshot=>{
+        querySnapshot.forEach(doc=>{
+          const data={
+            'id':doc.id,
+            'boardname':doc.data().boardname,
+            'slug':doc.data().slug
+          }
+          this.boards.push(data);
+          console.log(doc.data().slug)
+        })
+      })
+    },
           addTask(){
        var user = firebase.auth().currentUser;
        if(user && this.title!=""){
@@ -266,6 +282,8 @@ export default {
                  
               })
               this.boardname=''
+              this.boards.splice(0,this.boards.length)
+              this.fetchdata();
               
             }
           },
@@ -294,20 +312,7 @@ export default {
           }
   },
   created(){
-           var user = firebase.auth().currentUser;
-           this.currentUser=firebase.auth().currentUser.email;
-           db.collection('users').doc(user.uid).collection('boards').orderBy('boardname').get().then(querySnapshot=>{
-             querySnapshot.forEach(doc=>{
-               const data={
-                 'id':doc.id,
-                 'boardname': doc.data().boardname,
-                 'slug':doc.data().slug
-                 
-               }
-               this.boards.push(data);
-               console.log(doc.data().slug);
-             })
-           })  
+           this.fetchdata(); 
   },
   
 };
