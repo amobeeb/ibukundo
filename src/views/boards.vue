@@ -302,9 +302,10 @@ name: 'boards',
                  
                }
               this.lists.push(data);
+                console.log(this.lid);
                console.log(data);
                console.log(doc.data().slug);
-               console.log(this.lid);
+             
              })
            })  
         },
