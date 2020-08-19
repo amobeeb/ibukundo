@@ -92,13 +92,25 @@
         <v-flex xs12><h2> {{boardname}} </h2></v-flex>
         <v-flex sm3 v-for="list in lists" :key="list.listname" pa-1>
           <v-card>
-            <v-card-title primary-title>
-              <div class="headline">
+            <v-card-title primary-title color="primary">
+              <div class="headline" >
                 {{list.listname}}
               </div>
             </v-card-title>
+            <v-card v-for="card in cards" :key=card.card_id>
+             
+            </v-card>
+             <v-text-field
+            label="Add Card"
+            outlined
+            full-width
+            prepend-inner-icon="add"
+            v-model="cardname"
+            v-bind="list.listname"
+          ></v-text-field>
             <v-card-actions>
-              <v-btn color="primary" text>G0</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="createCardUnderList">ADD</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -213,8 +225,12 @@ name: 'boards',
     slug:'',
     priority:null,
     listname:'',
+    board_id:'',
     bid:'',
     bidcontainer:'',
+    cardname:'',
+    card_id:'',
+
     lid:'',
     due:null,
     username:'',
@@ -232,6 +248,7 @@ name: 'boards',
     boards:[],
     tasks:[],
     lists:[],
+    cards:[],
     inprogresstasks:[],
     completedtasks:[],
     
@@ -272,11 +289,12 @@ name: 'boards',
            this.currentUser=firebase.auth().currentUser.email;
            this.bid=this.$route.query.slug;
            this.bid=this.$route.params.slug;
-           db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').get().then(querySnapshot=>{
+           db.collection('users').doc(user.uid).collection('boards').
+           doc(this.bid).collection('lists').get().then(querySnapshot=>{
              querySnapshot.forEach(doc=>{
                const data={
                  'id':doc.id,
-                 'boardname': doc.data().boardname,
+                 'listname': doc.data().listname,
                  'slug':doc.data().slug
                  
                }
@@ -287,17 +305,17 @@ name: 'boards',
              })
            })  
         },
-         getTask(){
+         getCard(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
            this.bid=this.$route.query.slug;
            this.bid=this.$route.params.slug;
            db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
-           .doc(this.lid).get().then(querySnapshot=>{
+           .where('board_id','==',this.bid).get().then(querySnapshot=>{
              querySnapshot.forEach(doc=>{
                const data={
                  'id':doc.id,
-                 'boardname': doc.data().boardname,
+                 'listname': doc.data().listname,
                  'slug':doc.data().slug
                  
                }
@@ -305,6 +323,28 @@ name: 'boards',
                 console.log(this.lid);
                console.log(data);
                console.log(doc.data().slug);
+             
+             })
+           })  
+        },
+         getCardUnderList(){
+           var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.bid=this.$route.query.slug;
+           this.bid=this.$route.params.slug;
+           db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
+           .where('board_id','==',this.bid).collection('cards').where('card_id','==',this.lid).get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'cardname': doc.data().cardname,
+                 'card_id':doc.data().card_id
+                 
+               }
+              this.cards.push(data);
+                console.log(this.lid);
+               console.log(data);
+               console.log(doc.data().card_id);
              
              })
            })  
@@ -350,10 +390,29 @@ name: 'boards',
             if(user &&this.listname!=''){
                db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.lid).set({
                 listname:this.listname,
-                slug:this.lid
+                slug:this.lid,
+                board_id:this.bid
               })
               this.listname=''
+              this.lists.splice(0,this.lists.length)
+              this.getCard()
+             
               
+            }
+          },
+              createCardUnderList(){
+            var user=firebase.auth().currentUser;
+            this.card_id=this.generateUUID()
+            if(user &&this.listname!=''){
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.lid).collection('cards')
+               .set({
+                cardname:this.cardname,
+                card_id:this.card_id,
+                list_id:this.lid
+              })
+              this.cardname=''
+              this.lists.splice(0,this.lists.length)
+              this.getCardUnderList()
              
               
             }
@@ -385,7 +444,8 @@ name: 'boards',
   },
   mounted(){
     this.listTask();
-    this.getTask();
+    this.getCard();
+    this.getCardUnderList();
   },
    created(){
           this.listTask();
