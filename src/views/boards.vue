@@ -90,7 +90,7 @@
     <v-slide-y-transition mode="out-in">
       <v-layout row align-left wrap>
         <v-flex xs12><h2> {{boardname}} </h2></v-flex>
-        <v-flex sm3 v-for="list in lists" :key="list.listname" pa-1>
+        <v-flex sm3 v-for="(list,index) in lists" :key="index" pa-1>
           <v-card>
             <v-card-title primary-title color="primary">
               <div class="headline" >
@@ -98,14 +98,14 @@
               </div>
             </v-card-title>
             <v-card v-for="card in cards" :key=card.card_id>
-             
+             {{cardname}}
             </v-card>
              <v-text-field
             label="Add Card"
             outlined
             full-width
             prepend-inner-icon="add"
-            v-model="cardname"
+            v-model="cardname.cardno"
           ></v-text-field>
             <v-card-actions>
           <v-spacer></v-spacer>
@@ -227,7 +227,9 @@ name: 'boards',
     board_id:'',
     bid:'',
     bidcontainer:'',
-    cardname:'',
+    cardname:{
+      cardno: ''
+    },
     card_id:'',
 
     lid:'',
@@ -402,7 +404,8 @@ name: 'boards',
               createCardUnderList(){
             var user=firebase.auth().currentUser;
             this.card_id=this.generateUUID()
-            if(user &&this.cardname!=''){
+            if(user &&this.cardname.cardno){
+              alert(this.cardname.cardno)
                db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
                .doc(this.lid).collection('cards').doc(this.card_id)
                .set({
@@ -410,9 +413,10 @@ name: 'boards',
                 card_id:this.card_id,
                 list_id:this.lid
               })
-              this.cardname=''
+              
               this. cards.splice(0,this.cards.length)
               this.getCardUnderList()
+              this.cardname=[]
               console.log("success");
               }
           },
@@ -444,6 +448,7 @@ name: 'boards',
   mounted(){
     this.listTask();
     this.getCard();
+    this.getCardUnderList()
   },
    created(){
           this.listTask();
