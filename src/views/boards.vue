@@ -106,7 +106,6 @@
             full-width
             prepend-inner-icon="add"
             v-model="cardname"
-            v-bind="list.listname"
           ></v-text-field>
             <v-card-actions>
           <v-spacer></v-spacer>
@@ -403,19 +402,19 @@ name: 'boards',
               createCardUnderList(){
             var user=firebase.auth().currentUser;
             this.card_id=this.generateUUID()
-            if(user &&this.listname!=''){
-               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.lid).collection('cards')
+            if(user &&this.cardname!=''){
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
+               .doc(this.lid).collection('cards').doc(this.card_id)
                .set({
                 cardname:this.cardname,
                 card_id:this.card_id,
                 list_id:this.lid
               })
               this.cardname=''
-              this.lists.splice(0,this.lists.length)
+              this. cards.splice(0,this.cards.length)
               this.getCardUnderList()
-             
-              
-            }
+              console.log("success");
+              }
           },
 
           logout(){
@@ -445,7 +444,6 @@ name: 'boards',
   mounted(){
     this.listTask();
     this.getCard();
-    this.getCardUnderList();
   },
    created(){
           this.listTask();
