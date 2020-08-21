@@ -87,27 +87,28 @@
       </v-list>
     </v-navigation-drawer>
     <v-container class="my-5" fluid>
+       <div text-lg-h6> <v-icon>person</v-icon>PERSONAL BOARDS</div>
+       <hr/>
     <v-slide-y-transition mode="out-in">
-      <v-layout row align-left wrap>
-        <v-flex sm3 v-for="board in boards" :key="board.slug" pa-1>
-          <v-card>
+      <v-layout row align-left wrap ma-5>
+        <v-flex sm2 v-for="board in boards" :key="board.slug" pa-1>
+          <router-link v-bind:to="{ name: 'boards', params: {slug: board.slug }}">
+          <v-card color="accent">
             <v-card-title primary-title>
               <div class="headline">
                 {{board.boardname}}
               </div>
             </v-card-title>
             <v-card-actions>
-              <router-link v-bind:to="{ name: 'boards', params: {slug: board.slug }}">
-              <v-btn text> GO</v-btn></router-link>
             </v-card-actions>
-          </v-card>
+          </v-card></router-link>
         </v-flex>
         <v-flex sm3 pa-2>
           <v-card width="300px">
             <v-card-title primary-title style="flex-direction:column">
               <div class="headline">Create Boards</div>
               <div><v-form>
-                <v-text-field v-model="boardname" title="name" required></v-text-field>
+                <v-text-field v-model="boardname" title="name" required ></v-text-field>
               </v-form>
               </div>
             </v-card-title>
@@ -120,7 +121,39 @@
 
       </v-layout>
     </v-slide-y-transition>
+  <div text-lg-h6> <v-icon>group</v-icon>GROUP BOARDS</div>
+  <hr/>
+  <v-slide-y-transition mode="out-in">
+      <v-layout row align-left wrap>
+        <v-flex sm2 v-for="groupboard in groupboards" :key="groupboard.grouslug" pa-1>
+          <router-link v-bind:to="{ name: 'groupboards', params: {groupslug: groupboard.groupslug }}">
+          <v-card color="accent">
+            <v-card-title primary-title>
+              <div class="headline">
+                {{groupboard.groupboardname}}
+              </div>
+            </v-card-title>
+            <v-card-actions>
+            </v-card-actions>
+          </v-card></router-link>
+        </v-flex>
+         <v-flex sm3 pa-2>
+          <v-card width="300px">
+            <v-card-title primary-title style="flex-direction:column">
+              <div class="headline">Create Group Boards</div>
+              <div><v-form>
+                <v-text-field v-model="groupboardname" title="name" required></v-text-field>
+              </v-form>
+              </div>
+            </v-card-title>
+            <v-card-actions>
+              <v-btn text color="secondary" class="ma-auto" @click="creategroupboard">Create</v-btn>
+            </v-card-actions>
 
+          </v-card>
+        </v-flex>
+        </v-layout>
+    </v-slide-y-transition>
     <template>
      <v-row justify="end" ma-2>
        <v-dialog v-model="dialog" persistent max-width="600px">
@@ -213,9 +246,12 @@ export default {
     task_id:'',
     priority:null,
     boardname:'',
+    groupboardname:'',
     due:null,
     slug:null,
+    groupslug:null,
     bid:'',
+    groupbid:'',
     username:'',
     isloggedin:false,
     loading:false,
@@ -230,6 +266,7 @@ export default {
 
     tasks:[],
     boards:[],
+    groupboards:[],
     inprogresstasks:[],
     completedtasks:[],
     
@@ -250,6 +287,21 @@ export default {
           }
           this.boards.push(data);
           console.log(doc.data().slug)
+        })
+      })
+    },
+    fetchgroupdata(){
+      var user =firebase.auth().currentUser;
+      this.currentUser=firebase.auth().currentUser.email;
+      db.collection('users').doc(user.uid).collection('groupboards').orderBy('groupboardname').get().then(querySnapshot=>{
+        querySnapshot.forEach(doc=>{
+          const data={
+            'id':doc.id,
+            'groupboardname':doc.data().groupboardname,
+            'groupslug':doc.data().groupslug
+          }
+          this.groupboards.push(data);
+          console.log(doc.data().groupslug)
         })
       })
     },
@@ -287,6 +339,21 @@ export default {
               
             }
           },
+           creategroupboard(){
+            this.groupbid=this.generateUUID()
+            var user=firebase.auth().currentUser;
+            if(user &&this.groupboardname!=''){
+              db.collection('users').doc(user.uid).collection('groupboards').doc(this.groupbid).set({
+                groupboardname:this.groupboardname,
+                 groupslug: this.groupbid
+                 
+              })
+              this.groupboardname=''
+              this.groupboards.splice(0,this.groupboards.length)
+              this.fetchgroupdata();
+              
+            }
+          },
 
           logout(){
             firebase.auth().signOut().then(()=>
@@ -313,6 +380,7 @@ export default {
   },
   created(){
            this.fetchdata(); 
+           this.fetchgroupdata();
   },
   
 };

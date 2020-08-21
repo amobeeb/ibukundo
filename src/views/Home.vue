@@ -5,8 +5,9 @@
       dense
       flat
       height="38px"
+      
     >
-      <v-toolbar-title class="display-2 mt-6" style="color:#043353">i-Planner</v-toolbar-title>
+      <v-toolbar-title class="display-2 mt-6" style="color:#043353" >i-Planner</v-toolbar-title>
 
       <v-spacer></v-spacer>
     <v-btn color="#043353" class="mt-6 display-1" text>Sign Up</v-btn>
@@ -34,7 +35,7 @@
     </v-app-bar>
     <v-divider></v-divider>
     <v-content>
-     <v-row no-gutters class="ml-12" >
+     <v-row no-gutters class="ml-12"  >
       <v-col
         :cols="8"
       >

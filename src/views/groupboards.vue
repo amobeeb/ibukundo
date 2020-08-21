@@ -1,84 +1,4 @@
- <router-link class="secondary-content" 
-      v-bind:to="{ name: 'taskdetails',
-       params: { task_id: task.task_id }}"><v-icon> edit</v-icon></router-link>
-       ///
-
-       grey lighten-4 fill-height"
-       ///
-           v-for="task in tasks">
-  <v-flex xs12 md6 :key="task.id">
-    <v-hover v-slot:default="{ hover }">
-        <v-card
-          :elevation="hover ? 12 : 2"
-          class="ma-2"
-          max-width="550"
-         :class="{ 'on-hover': hover }"
-
-        >
-         <div> {{task.task_id}} {{task.title}}</div>
-         <div class="caption mt-5"> <v-icon>today</v-icon>{{task.due}}</div>
-          <v-row
-          align="center"
-          justify="end"
-        >
-      <router-link class="secondary-content" 
-      v-bind:to="{ name: 'taskdetails',
-       params: { task_id: task.task_id }}"><v-icon> edit</v-icon></router-link>
-        </v-row>
-        </v-card>
-        
-      
-    </v-hover>
-  </v-flex>
-      </template>
-      ///
-      //////////////
-       var user = firebase.auth().currentUser;
-           this.currentUser=firebase.auth().currentUser.email;
-           db.collection('users').doc(user.uid).collection('tasks').orderBy('title').get().then(querySnapshot=>{
-             querySnapshot.forEach(doc=>{
-               const data={
-                 'id':doc.id,
-                 'task_id': doc.data().task_id,
-                 'title':doc.data().title,
-                 'priority':doc.data().priority,
-                 'due':doc.data().due
-                 
-               }
-               this.tasks.push(data);
-             })
-           }) 
-
-
-
-
-
-
-           ////////////////////////////
-
-            created(){
-            var user = firebase.auth().currentUser;
-           this.currentUser=firebase.auth().currentUser.email;
-           db.collection('users').doc(user.uid).collection('boards').where('slug','==', this.$route.params.slug).get().then(querySnapshot=>{
-             querySnapshot.forEach(doc=>{
-               const data={
-                 'id':doc.id,
-                 'boardname': doc.data().boardname,
-                 'slug':doc.data().slug
-                 
-               }
-               this.bid=doc.data().slug
-               this.bidcontainer=this.bid
-               this.boards.push(data);
-               console.log(doc.data().slug);
-                console.log(this.bid);
-             })
-           }) 
-  },
-
-
-  //////////////////////////////////////////////
-  <template>
+ <template>
  <div id="app">
   <v-app id="inspire">
     <v-app-bar
@@ -169,16 +89,27 @@
     <v-container class="my-5" fluid>
     <v-slide-y-transition mode="out-in">
       <v-layout row align-left wrap>
-        <v-flex xs12><h2> {{boardname}} </h2></v-flex>
+        <v-flex xs12><h2> {{groupboardname}} </h2></v-flex>
         <v-flex sm3 v-for="list in lists" :key="list.listname" pa-1>
           <v-card>
-            <v-card-title primary-title>
-              <div class="headline">
+            <v-card-title primary-title color="primary">
+              <div class="headline" >
                 {{list.listname}}
               </div>
             </v-card-title>
+            <v-card v-for="card in cards" :key=card.card_id>
+             {{cardname}}
+            </v-card>
+             <v-text-field
+            label="Add Card"
+            outlined
+            full-width
+            prepend-inner-icon="add"
+            v-model="cardname"
+          ></v-text-field>
             <v-card-actions>
-              <v-btn color="primary" text>G0</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="createCardUnderList">ADD</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -200,7 +131,7 @@
 
       </v-layout>
     </v-slide-y-transition>
-  <v-btn text>Testing</v-btn>
+  
     <template>
      <v-row justify="end" ma-2>
        <v-dialog v-model="dialog" persistent max-width="600px">
@@ -283,19 +214,24 @@ import firebase from "../firebase";
 import 'firebase/auth'
 const db = firebase.firestore();
 export default {
-name: 'board2',
+name: 'groupboards',
   data(){
     return{
     drawer: false,
     dialog: false,
     title:'',
-    boardname:null,
-    slug:'',
+    groupboardname:null,
+    groupslug:'',
     priority:null,
     listname:'',
-    bid:'',
-    bidcontainer:'',
-    lid:'',
+    board_id:'',
+    groupbid:'',
+    groupbidcontainer:'',
+    cardname:'',
+    card_id:'',
+
+
+    list_id:'',
     due:null,
     username:'',
     isloggedin:false,
@@ -309,9 +245,10 @@ name: 'board2',
       
     ],
 
-    boards:[],
+    groupboards:[],
     tasks:[],
     lists:[],
+    cards:[],
     inprogresstasks:[],
     completedtasks:[],
     
@@ -320,12 +257,12 @@ name: 'board2',
   },
     beforeRouteEnter(to,from,next){
          var user = firebase.auth().currentUser;
-      db.collection('users').doc(user.uid).collection('boards').where('slug', '==', to.params.slug).get()
+      db.collection('users').doc(user.uid).collection('groupgroupboards').where('groupslug', '==', to.params.groupslug).get()
       .then(querySnapshot=>{
           querySnapshot.forEach(doc=>{
               next(vm=>{
-                  vm.boardname=doc.data().boardname
-                  vm.bid=doc.data().slug
+                  vm.groupboardname=doc.data().groupboardname
+                  vm.groupbid=doc.data().groupslug
                   })
                   })
                   })
@@ -337,28 +274,116 @@ name: 'board2',
   methods:{
        fetchdata(){
             var user = firebase.auth().currentUser;
-             db.collection('users').doc(user.uid).collection('boards').where('slug','==', this.$route.params.slug).get()
+             db.collection('users').doc(user.uid).collection('groupboards').where('groupslug','==', this.$route.params.groupslug).get()
              .then(querySnapshot=>{
                  querySnapshot.forEach(doc=>{
-                     this.boardname=doc.data().boardname
-                     this.slug=doc.data().slug
-                     this.bid=doc.data().slug
+                     this.groupboardname=doc.data().groupboardname
+                     this.groupslug=doc.data().groupslug
+                     this.groupbid=doc.data().groupslug
                      
                  })
              })
         },
+        listTask(){
+           var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.groupbid=this.$route.query.groupslug;
+           this.groupbid=this.$route.params.groupslug;
+           db.collection('users').doc(user.uid).collection('groupboards').
+           doc(this.groupbid).collection('lists').get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'listname': doc.data().listname,
+                 'groupslug':doc.data().groupslug
+                 
+               }
+              this.list_id=doc.data().groupslug;
+               console.log(data);
+               console.log(this.list_id);
+               console.log(doc.data().groupslug);
+             })
+           })  
+        },
+         getList(){
+           var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.groupbid=this.$route.query.groupslug;
+           this.groupbid=this.$route.params.groupslug;
+           db.collection('users').doc(user.uid).collection('groupboards').doc(this.groupbid).collection('lists')
+           .where('board_id','==',this.groupbid).get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'listname': doc.data().listname,
+                 'groupslug':doc.data().groupslug
+                 
+               }
+              this.lists.push(data);
+                console.log(this.list_id);
+               console.log(data);
+               console.log(doc.data().groupslug);
+             
+             })
+           })  
+        },
+        listCard(){
+           var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.groupbid=this.$route.query.groupslug;
+           this.groupbid=this.$route.params.groupslug;
+           db.collection('users').doc(user.uid).collection('groupboards').
+           doc(this.groupbid).collection('lists').doc(this.list_id).collection('cards').get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'cardname': doc.data().cardname,
+                 'card_id':doc.data().card_id
+                 
+               }
+              this.list_id=doc.data().list_id;
+               console.log(data);
+               console.log(this.list_id);
+               console.log(doc.data().groupslug);
+             })
+           })  
+        },
+         getCardUnderList(){
+           var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.groupbid=this.$route.query.groupslug;
+           this.groupbid=this.$route.params.groupslug;
+           db.collection('users').doc(user.uid).collection('groupboards').doc(this.groupbid)
+           .collection('lists').doc(this.list_id).collection('cards').
+           where('list_id','==',this.list_id).get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'cardname': doc.data().cardname,
+                 'card_id':doc.data().card_id,
+                  'list_id':doc.data().list_id
+               }
+              this.cards.push(data);
+                console.log(this.list_id);
+               console.log(data);
+               console.log(doc.data().card_id);
+             
+             })
+           }) 
+        },
     testing(){
        var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
-           db.collection('users').doc(user.uid).collection('boards').doc(this.bidcontainer).collection('lists').orderBy('boardname').get().then(querySnapshot=>{
+           db.collection('users').doc(user.uid).collection('groupboards')
+           .doc(this.groupbidcontainer).collection('lists').orderBy('groupboardname').get().then(querySnapshot=>{
              querySnapshot.forEach(doc=>{
                const data={
-                 'boardname': doc.data().boardname,
-                 'slug':doc.data().slug
+                 'groupboardname': doc.data().groupboardname,
+                 'groupslug':doc.data().groupslug
                  
                }
-               this.boards.push(data);
-               console.log(doc.data().slug);
+               this.groupboards.push(data);
+               console.log(doc.data().groupslug);
              })
            })  
     },
@@ -383,16 +408,38 @@ name: 'board2',
           },
           createlist(){
             var user=firebase.auth().currentUser;
-            this.lid=this.generateUUID()
+            this.list_id=this.generateUUID()
             if(user &&this.listname!=''){
-               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.lid).set({
+               db.collection('users').doc(user.uid).collection('groupboards').doc(this.groupbid).collection('lists').doc(this.list_id).set({
                 listname:this.listname,
-                slug:this.lid
+                groupslug:this.list_id,
+                board_id:this.groupbid
               })
               this.listname=''
+              this.lists.splice(0,this.lists.length)
+              this.getCard()
              
               
             }
+          },
+              createCardUnderList(){
+            var user=firebase.auth().currentUser;
+            this.card_id=this.generateUUID()
+            if(user &&this.cardname!=''){
+              
+               db.collection('users').doc(user.uid).collection('groupboards').doc(this.groupbid).collection('lists')
+               .doc(this.list_id).collection('cards').doc(this.card_id)
+               .set({
+                cardname:this.cardname,
+                card_id:this.card_id,
+                list_id:this.list_id
+              })
+              
+              this. cards.splice(0,this.cards.length)
+              this.cardname=''
+             this.getCardUnderList();
+              console.log("success");
+              }
           },
 
           logout(){
@@ -404,12 +451,7 @@ name: 'board2',
           },
           
          generateUUID () {
-          let d = new Date().getTime()
-          let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            let r = (d + Math.random() * 16) % 16 | 0
-            d = Math.floor(d / 16)
-            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
-          })
+           let uuid = Math.floor(100000 + Math.random() * 900000).toString()
           return uuid
         },
           del(doc){
@@ -423,6 +465,16 @@ name: 'board2',
           update(){
 
           }
+  },
+  mounted(){
+    this.listTask();
+    this.getList();
+    this.getCardUnderList();
+  },
+   created(){
+          this.listTask();
+          this.listCard();
+         
   },
  
   
@@ -444,37 +496,3 @@ name: 'board2',
   border-left:4px solid tomato; 
 }
 </style>
-///////////////////////////////////////
-const router = new VueRouter({
-  routes
-})
-
-
-
-// router.beforeEach((to,from,next)=>{
-//   if(to.matched.some(record=>record.meta.requiresAuth)){
-//     if(!firebase.auth().currentUser){
-//       next({
-//         path:'/',
-//         query:{ redirect:to.fullPath}
-//       })
-//     }
-//     else{
-//       next();
-//     }
-//   }
-//   else if(to.matched.some(record=>record.meta.requiresGuest)){
-//     if(firebase.auth().currentUser){
-//       next({
-//         path:'/user',
-//         query:{ redirect:to.fullPath}
-//       })
-//     }
-//     else{
-//       next();
-//     }
-//   }
-//   else{
-//     next();
-//   }
-// })

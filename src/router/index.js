@@ -5,6 +5,7 @@ import About from '../views/About.vue'
 import user from '../views/user.vue'
 import note from '../views/notes.vue'
 import boards from '../views/boards.vue'
+import groupboards from '../views/groupboards.vue'
 import taskdetails from '../views/taskdetails.vue'
 import notedetails from '../views/notedetails.vue'
 // import firebase from 'firebase'
@@ -63,6 +64,14 @@ export default new VueRouter({
     path: '/:slug',
     name: 'boards',
     component:boards,
+    meta:{
+      requiresAuth:true
+    }
+  },
+  {
+    path: '/:groupslug',
+    name: 'groupboards',
+    component:groupboards,
     meta:{
       requiresAuth:true
     }

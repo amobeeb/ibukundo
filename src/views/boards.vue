@@ -88,28 +88,26 @@
     </v-navigation-drawer>
     <v-container class="my-5" fluid>
     <v-slide-y-transition mode="out-in">
-      <v-layout row align-left wrap>
-        <v-flex xs12><h2> {{boardname}} </h2></v-flex>
-        <v-flex sm3 v-for="(list,index) in lists" :key="index" pa-1>
-          <v-card>
+      <v-layout row align-left wrap ma-4>
+        <v-flex xs12><h2> {{boardname}} </h2>
+        </v-flex>
+        <v-flex sm2 v-for="list in lists" :key="list.listname" pa-1>
+          <v-card color="accent" >
             <v-card-title primary-title color="primary">
               <div class="headline" >
                 {{list.listname}}
               </div>
             </v-card-title>
-            <v-card v-for="card in cards" :key=card.card_id>
-             {{cardname}}
-            </v-card>
-             <v-text-field
-            label="Add Card"
-            outlined
-            full-width
-            prepend-inner-icon="add"
-            v-model="cardname.cardno"
-          ></v-text-field>
+            <div>
+                  <ul>
+                    <li v-for="card in cards" :key="card.card_id">
+                      {{card.cardname}}
+                    </li>
+                  </ul>
+                </div>
             <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="createCardUnderList">ADD</v-btn>
+              <Createcard :list_id="list.id" :bid="$route.params.slug">
+              </Createcard>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -213,8 +211,12 @@
 import firebase from "../firebase";
 import 'firebase/auth'
 const db = firebase.firestore();
+import Createcard from './Createcard';
 export default {
 name: 'boards',
+components:{
+  Createcard
+},
   data(){
     return{
     drawer: false,
@@ -227,12 +229,11 @@ name: 'boards',
     board_id:'',
     bid:'',
     bidcontainer:'',
-    cardname:{
-      cardno: ''
-    },
+    cardname:'',
     card_id:'',
 
-    lid:'',
+
+    list_id:'',
     due:null,
     username:'',
     isloggedin:false,
@@ -299,14 +300,14 @@ name: 'boards',
                  'slug':doc.data().slug
                  
                }
-              this.lid=doc.data().slug;
+              this.list_id=doc.data().slug;
                console.log(data);
-               console.log(this.lid);
+               console.log(this.list_id);
                console.log(doc.data().slug);
              })
            })  
         },
-         getCard(){
+         getList(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
            this.bid=this.$route.query.slug;
@@ -321,10 +322,31 @@ name: 'boards',
                  
                }
               this.lists.push(data);
-                console.log(this.lid);
+                console.log(this.list_id);
                console.log(data);
                console.log(doc.data().slug);
              
+             })
+           })  
+        },
+        listCard(){
+           var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.bid=this.$route.query.slug;
+           this.bid=this.$route.params.slug;
+           db.collection('users').doc(user.uid).collection('boards').
+           doc(this.bid).collection('lists').doc('491488').collection('cards').get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'cardname': doc.data().cardname,
+                 'card_id':doc.data().card_id
+                 
+               }
+              this.list_id=doc.data().list_id;
+               console.log(data);
+               console.log(this.list_id);
+               console.log(doc.data().slug);
              })
            })  
         },
@@ -333,22 +355,23 @@ name: 'boards',
            this.currentUser=firebase.auth().currentUser.email;
            this.bid=this.$route.query.slug;
            this.bid=this.$route.params.slug;
-           db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
-           .where('board_id','==',this.bid).collection('cards').where('card_id','==',this.lid).get().then(querySnapshot=>{
+           db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+           .collection('lists').doc('491488').collection('cards').
+           where('board_id','==',this.bid).get().then(querySnapshot=>{
              querySnapshot.forEach(doc=>{
                const data={
                  'id':doc.id,
                  'cardname': doc.data().cardname,
-                 'card_id':doc.data().card_id
-                 
+                 'card_id':doc.data().card_id,
+                  'list_id':doc.data().list_id
                }
               this.cards.push(data);
-                console.log(this.lid);
+                console.log(this.list_id);
                console.log(data);
                console.log(doc.data().card_id);
              
              })
-           })  
+           }) 
         },
     testing(){
        var user = firebase.auth().currentUser;
@@ -387,16 +410,16 @@ name: 'boards',
           },
           createlist(){
             var user=firebase.auth().currentUser;
-            this.lid=this.generateUUID()
+            this.list_id=this.generateUUID()
             if(user &&this.listname!=''){
-               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.lid).set({
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.list_id).set({
                 listname:this.listname,
-                slug:this.lid,
+                slug:this.list_id,
                 board_id:this.bid
               })
               this.listname=''
               this.lists.splice(0,this.lists.length)
-              this.getCard()
+              this.getList()
              
               
             }
@@ -404,21 +427,22 @@ name: 'boards',
               createCardUnderList(){
             var user=firebase.auth().currentUser;
             this.card_id=this.generateUUID()
-            if(user &&this.cardname.cardno){
-              alert(this.cardname.cardno)
+            if(user &&this.cardname!=''){
+              
                db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
-               .doc(this.lid).collection('cards').doc(this.card_id)
+               .doc(this.list_id).collection('cards').doc(this.card_id)
                .set({
                 cardname:this.cardname,
                 card_id:this.card_id,
-                list_id:this.lid
+                list_id:this.list_id
               })
               
               this. cards.splice(0,this.cards.length)
-              this.getCardUnderList()
-              this.cardname=[]
+              this.cardname=''
+             this.getCardUnderList();
               console.log("success");
               }
+              this.getCardUnderList();
           },
 
           logout(){
@@ -445,13 +469,22 @@ name: 'boards',
 
           }
   },
+  computed:{
+    cardsbylistid(){
+      return this.cards.reduce((byid,card)=>{
+        byid[card.list_id]=byid[card.list_id]||byid[card.list_id].push(card);
+        return byid;
+      })
+    }
+  },
   mounted(){
     this.listTask();
-    this.getCard();
-    this.getCardUnderList()
+    this.getList();
+    this.getCardUnderList();
   },
    created(){
           this.listTask();
+          this.listCard();
          
   },
  
