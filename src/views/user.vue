@@ -91,20 +91,19 @@
        <hr/>
     <v-slide-y-transition mode="out-in">
       <v-layout row align-left wrap ma-5>
-        <v-flex sm2 v-for="board in boards" :key="board.slug" pa-1>
+        <v-flex sm3 v-for="board in boards" :key="board.slug" pa-1>
           <router-link v-bind:to="{ name: 'boards', params: {slug: board.slug }}">
-          <v-card color="accent">
+          <v-card color="accent" raised >
+            
             <v-card-title primary-title>
-              <div class="headline">
                 {{board.boardname}}
-              </div>
             </v-card-title>
             <v-card-actions>
             </v-card-actions>
           </v-card></router-link>
         </v-flex>
         <v-flex sm3 pa-2>
-          <v-card width="300px">
+          <v-card width="300px" raised >
             <v-card-title primary-title style="flex-direction:column">
               <div class="headline">Create Boards</div>
               <div><v-form>
@@ -125,20 +124,18 @@
   <hr/>
   <v-slide-y-transition mode="out-in">
       <v-layout row align-left wrap>
-        <v-flex sm2 v-for="groupboard in groupboards" :key="groupboard.grouslug" pa-1>
+        <v-flex sm3 v-for="groupboard in groupboards" :key="groupboard.grouslug" pa-1>
           <router-link v-bind:to="{ name: 'groupboards', params: {groupslug: groupboard.groupslug }}">
-          <v-card color="accent">
+          <v-card color="accent" raised >
             <v-card-title primary-title>
-              <div class="headline">
                 {{groupboard.groupboardname}}
-              </div>
             </v-card-title>
             <v-card-actions>
             </v-card-actions>
           </v-card></router-link>
         </v-flex>
          <v-flex sm3 pa-2>
-          <v-card width="300px">
+          <v-card width="300px" raised>
             <v-card-title primary-title style="flex-direction:column">
               <div class="headline">Create Group Boards</div>
               <div><v-form>
@@ -259,7 +256,7 @@ export default {
       date: new Date().toISOString().substr(0, 10),
       modal:false,
    items: [
-      { icon: 'today', text: 'TASKS', route:'/user' },
+      { icon: 'today', text: 'BOARDS', route:'/user' },
       { icon: 'notes', text: 'NOTES', route:'/notes' },
       
     ],

@@ -1,19 +1,25 @@
 <template>
 <v-flex sm12 > 
-    <v-card>
-      <v-card-title primary-title style="flex-direction:column">
-        <div>
+    <v-card
+    :loading="loading"
+    class=""
+    max-width="374"
+    flat>
+    <v-card-title></v-card-title>
+    <v-card-text>
+       <div>
         <v-text-field
-        label="Add Card"
+        label="Add A Task"
           outlined
-            full-width
               prepend-inner-icon="add"
               v-model="cardname">
               </v-text-field>
-        </div>
-      </v-card-title>
-    </v-card>
-    <v-btn color="primary" text @click="createCardUnderList">ADD</v-btn>
+        </div>  
+    </v-card-text>
+<v-card-actions>
+  <v-btn color="primary" text @click="createCardUnderList">ADD</v-btn>
+    </v-card-actions>
+  </v-card>
   </v-flex>
 </template>
 
@@ -73,8 +79,7 @@ export default {
             this.card_id=this.generateUUID()
             if(user &&this.cardname!=''){
               
-               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
-               .doc(this.list_id).collection('cards').doc(this.card_id)
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('cards').doc(this.card_id)
                .set({
                 cardname:this.cardname,
                 card_id:this.card_id,
@@ -94,17 +99,18 @@ export default {
            this.bid=this.$route.query.slug;
            this.bid=this.$route.params.slug;
            db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
-           .collection('lists').doc('491488').collection('cards').
+           .collection('cards').
            where('board_id','==',this.bid).get().then(querySnapshot=>{
              querySnapshot.forEach(doc=>{
                const data={
                  'id':doc.id,
                  'cardname': doc.data().cardname,
                  'card_id':doc.data().card_id,
-                  'list_id':doc.data().list_id
+                  'list_id':doc.data().list_id,
+                  'board_id':doc.data().board_id
                }
               this.cards.push(data);
-                console.log(this.list_id);
+                console.log(this.slug);
                console.log(data);
                console.log(doc.data().card_id);
              

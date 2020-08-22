@@ -8,6 +8,7 @@ import boards from '../views/boards.vue'
 import groupboards from '../views/groupboards.vue'
 import taskdetails from '../views/taskdetails.vue'
 import notedetails from '../views/notedetails.vue'
+import testing from '../views/testing.vue'
 // import firebase from 'firebase'
 
 
@@ -81,6 +82,14 @@ export default new VueRouter({
   path:'/:note_id',
   name:'notedetails',
   component:notedetails,
+  meta:{
+    requiresAuth:true
+  }
+},
+{
+  path:'/testing',
+  name:'testing',
+  component:testing,
   meta:{
     requiresAuth:true
   }

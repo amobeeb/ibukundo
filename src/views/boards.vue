@@ -87,23 +87,21 @@
       </v-list>
     </v-navigation-drawer>
     <v-container class="my-5" fluid>
+      <div class="display-2">{{boardname}}</div>
+      <hr>
     <v-slide-y-transition mode="out-in">
-      <v-layout row align-left wrap ma-4>
-        <v-flex xs12><h2> {{boardname}} </h2>
-        </v-flex>
-        <v-flex sm2 v-for="list in lists" :key="list.listname" pa-1>
-          <v-card color="accent" >
+      <v-layout row align-left wrap>
+        <v-flex sm3 v-for="list in lists" :key="list.listname" px-2>
+          <v-card  class="ma-auto" color="grey">
             <v-card-title primary-title color="primary">
               <div class="headline" >
                 {{list.listname}}
               </div>
             </v-card-title>
-            <div>
-                  <ul>
-                    <li v-for="card in cards" :key="card.card_id">
-                      {{card.cardname}}
-                    </li>
-                  </ul>
+            <div pa-2  v-for="card in cards" :key="card.card_id">
+              <v-card flat v-if="card.list_id == list.slug">
+                <v-card-title>{{card.cardname}}</v-card-title>
+              </v-card>
                 </div>
             <v-card-actions>
               <Createcard :list_id="list.id" :bid="$route.params.slug">
@@ -112,7 +110,7 @@
           </v-card>
         </v-flex>
         <v-flex sm3 pa-2>
-          <v-card width="300px">
+          <v-card width="300px" mt-auto>
            <v-card-title primary-title style="flex-direction:column">
               <div class="headline">Create lists</div>
               <div><v-form>
@@ -242,7 +240,7 @@ components:{
       date: new Date().toISOString().substr(0, 10),
       modal:false,
    items: [
-      { icon: 'today', text: 'TASKS', route:'/user' },
+      { icon: 'today', text: 'BOARDS', route:'/user' },
       { icon: 'notes', text: 'NOTES', route:'/notes' },
       
     ],
@@ -324,7 +322,7 @@ components:{
               this.lists.push(data);
                 console.log(this.list_id);
                console.log(data);
-               console.log(doc.data().slug);
+               console.log("slug"+doc.data().slug);
              
              })
            })  
@@ -335,7 +333,7 @@ components:{
            this.bid=this.$route.query.slug;
            this.bid=this.$route.params.slug;
            db.collection('users').doc(user.uid).collection('boards').
-           doc(this.bid).collection('lists').doc('491488').collection('cards').get().then(querySnapshot=>{
+           doc(this.bid).collection('cards').get().then(querySnapshot=>{
              querySnapshot.forEach(doc=>{
                const data={
                  'id':doc.id,
@@ -356,14 +354,14 @@ components:{
            this.bid=this.$route.query.slug;
            this.bid=this.$route.params.slug;
            db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
-           .collection('lists').doc('491488').collection('cards').
-           where('board_id','==',this.bid).get().then(querySnapshot=>{
+           .collection('cards').get().then(querySnapshot=>{
              querySnapshot.forEach(doc=>{
                const data={
                  'id':doc.id,
                  'cardname': doc.data().cardname,
                  'card_id':doc.data().card_id,
-                  'list_id':doc.data().list_id
+                  'list_id':doc.data().list_id,
+                  'board_id':doc.data().board_id
                }
               this.cards.push(data);
                 console.log(this.list_id);
@@ -429,20 +427,20 @@ components:{
             this.card_id=this.generateUUID()
             if(user &&this.cardname!=''){
               
-               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists')
-               .doc(this.list_id).collection('cards').doc(this.card_id)
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('cards').doc(this.card_id)
                .set({
                 cardname:this.cardname,
                 card_id:this.card_id,
-                list_id:this.list_id
+                list_id:this.list_id,
+                 board_id:this.bid
               })
               
-              this. cards.splice(0,this.cards.length)
+              this.cards.splice(0,this.cards.length)
               this.cardname=''
              this.getCardUnderList();
               console.log("success");
               }
-              this.getCardUnderList();
+              
           },
 
           logout(){
