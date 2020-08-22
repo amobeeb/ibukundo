@@ -93,7 +93,7 @@
       <v-layout row align-left wrap ma-5>
         <v-flex sm3 v-for="board in boards" :key="board.slug" pa-1>
           <router-link v-bind:to="{ name: 'boards', params: {slug: board.slug }}">
-          <v-card color="accent" raised >
+          <v-card raised >
             
             <v-card-title primary-title>
                 {{board.boardname}}
@@ -126,7 +126,7 @@
       <v-layout row align-left wrap>
         <v-flex sm3 v-for="groupboard in groupboards" :key="groupboard.grouslug" pa-1>
           <router-link v-bind:to="{ name: 'groupboards', params: {groupslug: groupboard.groupslug }}">
-          <v-card color="accent" raised >
+          <v-card  raised >
             <v-card-title primary-title>
                 {{groupboard.groupboardname}}
             </v-card-title>

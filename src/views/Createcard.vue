@@ -86,11 +86,9 @@ export default {
                 list_id:this.list_id,
                 board_id:this.bid
               })
-              
-              this. cards.splice(0,this.cards.length)
               this.cardname=''
+              this.cards.splice(0,this.cards.length)
              this.getCardUnderList();
-              console.log("success");
               }
           }, 
           getCardUnderList(){

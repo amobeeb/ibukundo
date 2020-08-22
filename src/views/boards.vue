@@ -90,19 +90,20 @@
       <div class="display-2">{{boardname}}</div>
       <hr>
     <v-slide-y-transition mode="out-in">
-      <v-layout row align-left wrap>
-        <v-flex sm3 v-for="list in lists" :key="list.listname" px-2>
-          <v-card  class="ma-auto" color="grey">
+      <v-layout row align-left wrap >
+        <v-flex sm3 v-for="list in lists" :key="list.listname" px-2 pt-5>
+          <v-card>
             <v-card-title primary-title color="primary">
               <div class="headline" >
                 {{list.listname}}
               </div>
             </v-card-title>
-            <div pa-2  v-for="card in cards" :key="card.card_id">
-              <v-card flat v-if="card.list_id == list.slug">
-                <v-card-title>{{card.cardname}}</v-card-title>
+            <v-flex pa-4 v-for="card in cards" :key="card.card_id">
+              <v-card pa-4 v-if="card.list_id == list.slug">
+                <v-card-title>{{card.cardname}} <v-spacer></v-spacer> <v-icon large right color="teal darken-2">mdi-pen</v-icon></v-card-title>
+                
               </v-card>
-                </div>
+            </v-flex>
             <v-card-actions>
               <Createcard :list_id="list.id" :bid="$route.params.slug">
               </Createcard>
@@ -434,11 +435,10 @@ components:{
                 list_id:this.list_id,
                  board_id:this.bid
               })
-              
-              this.cards.splice(0,this.cards.length)
               this.cardname=''
+              this.cards.splice(0,this.cards.length)
              this.getCardUnderList();
-              console.log("success");
+              
               }
               
           },
