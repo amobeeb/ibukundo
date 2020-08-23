@@ -92,39 +92,27 @@
     <v-slide-y-transition mode="out-in">
       <v-layout row wrap >
         <v-flex sm3 v-for="list in lists" :key="list.listname" px-2 pt-5>
-          <v-card>
+          <v-card @dragover="setdroppinglist($event,list)">
             <v-card-title primary-title color="primary">
               <div class="headline" >
                 {{list.listname}}
               </div>
             </v-card-title>
             <v-flex xs12 class="pa-1" v-for="card in cards" :key="card.card_id">
-              <v-card pa-4 v-if="card.list_id == list.slug" >
+              <v-card pa-4 v-if="card.list_id == list.slug" draggable="true" @dragstart="startdraggingcard(card)" >
                 <v-container fluid grid-list-lg>
                   <v-layout row >
                     <v-flex xs12 class="pa-2">
                       <div>
                 <div class="subtitle text-capitalize">{{card.cardname}} <v-spacer></v-spacer> </div>
-            <v-icon small right @click="card_details=!card_details" > create</v-icon> 
+         <v-icon small right @click="open_modal(card.cardname)" > create</v-icon> 
                     </div>
                   
                     </v-flex>
                   </v-layout>
                 </v-container>
               </v-card>
-               <v-row justify="center">
-        <v-dialog v-model="card_details" persistent max-width="600px">
-           <v-card>
-        <v-card-title class="headline"> {{card.car}}</v-card-title>
-        <v-card-text></v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="green darken-1" text @click="card_details = false">Close</v-btn>
-          <v-btn color="green darken-1" text @click="card_details = false">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-                    </v-dialog>
-                    </v-row>
+          
             </v-flex>
             <v-card-actions>
               <Createcard :list_id="list.id" :bid="$route.params.slug">
@@ -224,6 +212,19 @@
     </v-container>
    
   </v-app>
+    <v-row justify="center">
+        <v-dialog v-model="card_details" persistent max-width="600px">
+           <v-card>
+        <v-card-title class="headline">{{num}}</v-card-title>
+        <v-card-text></v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="card_details = false">Close</v-btn>
+          <v-btn color="green darken-1" text @click="card_details = false">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+                    </v-dialog>
+                    </v-row>
 </div>
 </template>
 
@@ -240,6 +241,8 @@ components:{
 },
   data(){
     return{
+    draggingcard:null,
+    droppinglist:null,
     drawer: false,
     dialog: false,
     card_details:false,
@@ -253,6 +256,7 @@ components:{
     bidcontainer:'',
     cardname:'',
     card_id:'',
+    num:'asa',
 
 
     list_id:'',
@@ -296,6 +300,10 @@ components:{
     },
      
   methods:{
+     open_modal(value){
+      this.num = value;
+      this.card_details=!this.card_details
+    },
        fetchdata(){
             var user = firebase.auth().currentUser;
              db.collection('users').doc(user.uid).collection('boards').where('slug','==', this.$route.params.slug).get()
@@ -307,6 +315,14 @@ components:{
                      
                  })
              })
+        },
+        startdraggingcard(card){
+          console.log('started dragging',card);
+          this.draggingcard=card;
+        },
+        setdroppinglist(event, list){
+          this.droppinglist=list;
+          event.preventDefault();
         },
         listTask(){
            var user = firebase.auth().currentUser;
