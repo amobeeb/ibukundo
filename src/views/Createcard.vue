@@ -88,9 +88,10 @@ export default {
               })
               this.cardname=''
               this.cards.splice(0,this.cards.length)
-             this.getCardUnderList();
               }
+              this.getCardUnderList();
           }, 
+
           getCardUnderList(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;

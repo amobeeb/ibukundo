@@ -90,7 +90,7 @@
       <div class="display-2">{{boardname}}</div>
       <hr>
     <v-slide-y-transition mode="out-in">
-      <v-layout row align-left wrap >
+      <v-layout row wrap >
         <v-flex sm3 v-for="list in lists" :key="list.listname" px-2 pt-5>
           <v-card>
             <v-card-title primary-title color="primary">
@@ -98,11 +98,33 @@
                 {{list.listname}}
               </div>
             </v-card-title>
-            <v-flex pa-4 v-for="card in cards" :key="card.card_id">
-              <v-card pa-4 v-if="card.list_id == list.slug">
-                <v-card-title>{{card.cardname}} <v-spacer></v-spacer> <v-icon large right color="teal darken-2">mdi-pen</v-icon></v-card-title>
-                
+            <v-flex xs12 class="pa-1" v-for="card in cards" :key="card.card_id">
+              <v-card pa-4 v-if="card.list_id == list.slug" >
+                <v-container fluid grid-list-lg>
+                  <v-layout row >
+                    <v-flex xs12 class="pa-2">
+                      <div>
+                <div class="subtitle text-capitalize">{{card.cardname}} <v-spacer></v-spacer> </div>
+            <v-icon small right @click="card_details=!card_details" > create</v-icon> 
+                    </div>
+                  
+                    </v-flex>
+                  </v-layout>
+                </v-container>
               </v-card>
+               <v-row justify="center">
+        <v-dialog v-model="card_details" persistent max-width="600px">
+           <v-card>
+        <v-card-title class="headline"> {{card.car}}</v-card-title>
+        <v-card-text></v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="card_details = false">Close</v-btn>
+          <v-btn color="green darken-1" text @click="card_details = false">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+                    </v-dialog>
+                    </v-row>
             </v-flex>
             <v-card-actions>
               <Createcard :list_id="list.id" :bid="$route.params.slug">
@@ -128,7 +150,7 @@
 
       </v-layout>
     </v-slide-y-transition>
-  
+   
     <template>
      <v-row justify="end" ma-2>
        <v-dialog v-model="dialog" persistent max-width="600px">
@@ -220,6 +242,7 @@ components:{
     return{
     drawer: false,
     dialog: false,
+    card_details:false,
     title:'',
     boardname:null,
     slug:'',
@@ -348,6 +371,9 @@ components:{
                console.log(doc.data().slug);
              })
            })  
+        },
+        details(){
+          alert('hello there');
         },
          getCardUnderList(){
            var user = firebase.auth().currentUser;
