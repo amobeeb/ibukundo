@@ -49,6 +49,8 @@ export default {
     card_id:'',
     due:null,
     username:'',
+    activitytext:'',
+    activity_id:'',
     card: {
       title: '',
       members: [],
@@ -68,6 +70,7 @@ export default {
     tasks:[],
     lists:[],
     cards:[],
+    activities:[],
     inprogresstasks:[],
     completedtasks:[],
     
@@ -86,6 +89,7 @@ export default {
                 list_id:this.list_id,
                 board_id:this.bid
               })
+               this.createlistactivity(`${user.email} created card ${this.cardname}`)
               this.cardname=''
               this.cards.splice(0,this.cards.length)
               }
@@ -115,7 +119,39 @@ export default {
              
              })
            }) 
-        },
+        },  createlistactivity(text){
+             var user=firebase.auth().currentUser;
+            this.activity_id=this.generateUUID()
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+               .collection('activities').doc(this.activity_id).set({
+                 activitytext:text,
+                activity_id:this.activity_id,
+                board_id:this.bid,
+                list_id:this.list_id
+                   })
+                     this.activities.splice(0,this.lists.length)
+                     this.getlistactivity()
+                   console.log('done');
+          },
+          getlistactivity(){
+            var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.bid=this.$route.query.slug;
+           this.bid=this.$route.params.slug;
+           db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+           .collection('activities').get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'activitytext': doc.data().activitytext,
+                 'activity_id':doc.data().activity_id,
+                  'list_id':doc.data().list_id,
+                  'board_id':doc.data().board_id
+               }
+              this.activities.push(data);
+             })
+           }) 
+          },
         generateUUID () {
            let uuid = Math.floor(100000 + Math.random() * 900000).toString()
           return uuid

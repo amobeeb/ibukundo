@@ -13,7 +13,7 @@
       <template v-slot:activator="{ on, attrs }">
         <v-btn
           icon
-          color="primary"
+          color="#043353"
           dark
           v-bind="attrs"  
           v-on="on"
@@ -25,7 +25,7 @@
       <template v-slot:activator="{ on, attrs }">
         <v-btn
           icon
-          color="primary"
+          color="#043353"
           dark
           v-bind="attrs"
           v-on="on"
@@ -87,24 +87,28 @@
       </v-list>
     </v-navigation-drawer>
     <v-container class="my-5" fluid>
-      <div class="display-2">{{boardname}}</div>
+      <div class="display-2"> {{boardname}} </div>
       <hr>
-    <v-slide-y-transition mode="out-in">
-      <v-layout row wrap >
-        <v-flex sm3 v-for="list in lists" :key="list.listname" px-2 pt-5>
-          <v-card @dragover="setdroppinglist($event,list)">
+    <v-layout>
+      <v-flex xs9>
+      <v-layout row wrap>
+        <v-flex sm3 v-for="list in lists" :key="list.listname" px-2 pt-5 >
+          <v-card @dragover="setdroppinglist($event,list)" color="#043353" :class="{'green lighten-4':droppinglist==list}">
             <v-card-title primary-title color="primary">
               <div class="headline" >
+                <span class="white--text">
                 {{list.listname}}
+                </span>
               </div>
             </v-card-title>
             <v-flex xs12 class="pa-1" v-for="card in cards" :key="card.card_id">
-              <v-card pa-4 v-if="card.list_id == list.slug" draggable="true" @dragstart="startdraggingcard(card)" >
-                <v-container fluid grid-list-lg>
+              <v-card color="grey-lighten-4" pa-4 v-if="card.list_id == list.slug" 
+              draggable="true" @dragstart="startdraggingcard(card)" @dragend="dropcard()">
+                <v-container fluid grid-list-lg color="grey-lighten-4">
                   <v-layout row >
                     <v-flex xs12 class="pa-2">
-                      <div>
-                <div class="subtitle text-capitalize">{{card.cardname}} <v-spacer></v-spacer> </div>
+                      <div color="grey-lighten-4">
+                <div class="subtitle text-capitalize" color="grey-lighten-4">{{card.cardname}} <v-spacer></v-spacer> </div>
          <v-icon small right @click="open_modal(card.cardname)" > create</v-icon> 
                     </div>
                   
@@ -137,7 +141,17 @@
         </v-flex>
 
       </v-layout>
-    </v-slide-y-transition>
+      </v-flex>
+        <v-flex xs3>
+          <v-card class="ml-5" flat>
+            <v-card-title>Activities</v-card-title>
+            <div v-for="activity in activitiesbydate" :key="activity.activity_id">
+              <div class="subtitle pa-2" >{{activity.activitytext}}</div>
+            </div>
+          </v-card>
+        </v-flex>
+      </v-layout>
+   
    
     <template>
      <v-row justify="end" ma-2>
@@ -257,9 +271,9 @@ components:{
     cardname:'',
     card_id:'',
     num:'asa',
-
-
+    activitytext:'',
     list_id:'',
+    activity_id:'',
     due:null,
     username:'',
     isloggedin:false,
@@ -277,6 +291,7 @@ components:{
     tasks:[],
     lists:[],
     cards:[],
+    activities:[],
     inprogresstasks:[],
     completedtasks:[],
     
@@ -323,6 +338,24 @@ components:{
         setdroppinglist(event, list){
           this.droppinglist=list;
           event.preventDefault();
+        },
+        dropcard(){
+           var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+          if(this.droppinglist){
+            if(this.draggingcard.list_id!==this.droppinglist.slug){
+              const fromlist=this.lists.find(list=>list.slug=== this.draggingcard.list_id)
+              db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+           .collection('cards').doc(this.draggingcard.card_id).update({list_id: this.droppinglist.slug})
+           this.createlistactivity(`${user.email} moved ${this.draggingcard.cardname} from ${fromlist.listname} to ${this.droppinglist.listname}`)
+           console.log(this.draggingcard.list_id,this.droppinglist.slug )
+             this.draggingcard.list_id=this.droppinglist.slug;
+            }
+      
+             
+        }
+        this.droppinglist=null;
+        this.draggingcard=null;
         },
         listTask(){
            var user = firebase.auth().currentUser;
@@ -388,9 +421,6 @@ components:{
              })
            })  
         },
-        details(){
-          alert('hello there');
-        },
          getCardUnderList(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
@@ -453,17 +483,49 @@ components:{
             var user=firebase.auth().currentUser;
             this.list_id=this.generateUUID()
             if(user &&this.listname!=''){
-               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('lists').doc(this.list_id).set({
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+               .collection('lists').doc(this.list_id).set({
                 listname:this.listname,
                 slug:this.list_id,
                 board_id:this.bid
               })
+              this.createlistactivity(`${user.email} created list ${this.listname}`)
               this.listname=''
               this.lists.splice(0,this.lists.length)
-              this.getList()
-             
-              
-            }
+              this.getList() }
+          },
+          createlistactivity(text){
+             var user=firebase.auth().currentUser;
+            this.activity_id=this.generateUUID()
+               db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+               .collection('activities').doc(this.activity_id).set({
+                 activitytext:text,
+                activity_id:this.activity_id,
+                board_id:this.bid,
+                list_id:this.list_id
+                   })
+                     this.activities.splice(0,this.lists.length)
+                     this.getlistactivity()
+                   console.log('done');
+          },
+          getlistactivity(){
+            var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+           this.bid=this.$route.query.slug;
+           this.bid=this.$route.params.slug;
+           db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+           .collection('activities').get().then(querySnapshot=>{
+             querySnapshot.forEach(doc=>{
+               const data={
+                 'id':doc.id,
+                 'activitytext': doc.data().activitytext,
+                 'activity_id':doc.data().activity_id,
+                  'list_id':doc.data().list_id,
+                  'board_id':doc.data().board_id
+               }
+              this.activities.push(data);
+             })
+           }) 
           },
               createCardUnderList(){
             var user=firebase.auth().currentUser;
@@ -515,12 +577,16 @@ components:{
         byid[card.list_id]=byid[card.list_id]||byid[card.list_id].push(card);
         return byid;
       })
+    },
+    activitiesbydate(){
+      return this.activities.slice().reverse();
     }
   },
   mounted(){
     this.listTask();
     this.getList();
     this.getCardUnderList();
+    this.getlistactivity();
   },
    created(){
           this.listTask();
