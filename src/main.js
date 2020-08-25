@@ -9,20 +9,19 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import axios from 'axios';
 import firebase from 'firebase'
 import 'firebase';
-Vue.prototype.$axios=axios;
+
+Vue.prototype.$axios = axios;
 Vue.config.productionTip = false
 
 let app;
 // eslint-disable-next-line no-unused-vars
-firebase.auth().onAuthStateChanged(user=>{
-  if(!app){
-    app=new Vue({
-      router,
-      vuetify,
-      render: h => h(App),
-      
-    }).$mount('#app')
-  }
+firebase.auth().onAuthStateChanged(user => {
+    if (!app) {
+        app = new Vue({
+            router,
+            vuetify,
+            render: h => h(App),
+
+        }).$mount('#app')
+    }
 });
-
-
