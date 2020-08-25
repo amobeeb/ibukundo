@@ -109,7 +109,7 @@
                     <v-flex xs12 class="pa-2">
                       <div color="grey-lighten-4">
                 <div class="subtitle text-capitalize" color="grey-lighten-4">{{card.cardname}} <v-spacer></v-spacer> </div>
-         <v-icon small right @click="open_modal(card.cardname,card.card_id,card.Description)" > create</v-icon> 
+         <v-icon small right @click="open_modal(card.cardname,card.card_id,card.Description,card.Duedate)" > create</v-icon> 
                     </div>
                   
                     </v-flex>
@@ -230,15 +230,17 @@
         <v-dialog v-model="card_details" persistent max-width="800px">
            <v-card>
         <v-card-title class="headline text-capitalize">{{num}} </v-card-title>        
-           <v-col cols="16"> <v-text-field label="Description" required v-model="Description" @click="savedescription=false" ></v-text-field>
+           <v-col cols="16"> <v-text-field label="Description" required v-model="Description"
+            @click="savedescription=false" ></v-text-field>
+             {{cardDescription}}
               </v-col>
-               {{cardDescription}}
               <v-btn  color="green darken-1" text v-model="savedescription" :disabled="savedescription" @click="savedescriptionindb()">Save</v-btn>
               <v-col cols="12"> <v-text-field label="Comment" required v-model="Comment" @click="savecomment=false"></v-text-field>
               </v-col>
                <v-btn color="blue darken-1" text v-model="savecomment" :disabled="savecomment">ADD</v-btn>
-        <v-card-text class="mt-4 mb-0">ADD TO CARD</v-card-text>
+        <v-card-text class="mt-4 mb-0">ADD TO CARD </v-card-text>
         <v-btn large text mt-0 ><v-icon>person</v-icon>MEMBERS</v-btn>
+        <v-btn large text mt-0 @click="opendate"><v-icon>today</v-icon>DUE DATE</v-btn ><span>{{duedate}}</span>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="green darken-1" text @click="card_details = false">Close</v-btn>
@@ -247,6 +249,32 @@
       </v-card>
                     </v-dialog>
                     </v-row>
+  <v-dialog v-model="datepicker" scrollable max-width="370px">
+      <v-card>
+        <v-card-title>DUE DATE</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text style="height: 700px;">
+  <v-row>
+    <v-col> <v-text-field outlined label="Date" v-model="date"></v-text-field></v-col>
+    
+    <v-col> <v-text-field outlined label="Time" v-model="dateinside"></v-text-field></v-col>
+    <v-date-picker class="ma-auto" v-model="date"></v-date-picker>
+    <v-card-subtitle> Set Reminder</v-card-subtitle>
+     <v-select
+          :items="items2"
+          label="Reminder"
+          outlined
+        ></v-select>
+        <v-card-actions>
+          <v-btn color="blue darken-1" text @click="updateDate">Save</v-btn>
+          <v-btn color="red darken-1" text @click="dialog = false">Remove</v-btn>
+        </v-card-actions>
+  </v-row>
+
+        </v-card-text>
+        <v-divider></v-divider>
+      </v-card>
+    </v-dialog>
 </div>
 </template>
 
@@ -268,6 +296,7 @@ components:{
     drawer: false,
     dialog: false,
     card_details:false,
+    datepicker:false,
     title:'',
     boardname:null,
     Description:'',
@@ -289,9 +318,11 @@ components:{
     savedescription:true,
     savecomment:true,
     due:null,
+    duedate:"",
     username:'',
     isloggedin:false,
     loading:false,
+    dateinside:'',
     currentUser:false,
       date: new Date().toISOString().substr(0, 10),
       modal:false,
@@ -300,6 +331,8 @@ components:{
       { icon: 'notes', text: 'NOTES', route:'/notes' },
       
     ],
+    items2: ['1 day before', '2 days before', '1 hour before', '2 hours before'],
+    
 
     boards:[],
     tasks:[],
@@ -329,11 +362,23 @@ components:{
     },
      
   methods:{
-     open_modal(value,cid,cardDescription){
+     open_modal(value,cid,cardDescription,duedate){
       this.num = value;
       this.cid = cid;
       this.cardDescription=cardDescription
+      this.duedate=duedate;
       this.card_details=!this.card_details
+    },
+    updateDate(){
+         var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+            db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+           .collection('cards').doc(this.cid).update({Duedate: this.date})
+           this.Description=""
+            this.datepicker=!this.datepicker;
+    },
+    opendate(){
+      this.datepicker=!this.datepicker;
     },
        fetchdata(){
             var user = firebase.auth().currentUser;
@@ -456,7 +501,8 @@ components:{
                  'card_id':doc.data().card_id,
                   'list_id':doc.data().list_id,
                   'board_id':doc.data().board_id,
-                  'Description':doc.data().Description
+                  'Description':doc.data().Description,
+                   'Duedate':doc.data().Duedate
                }
               this.cards.push(data);
                 console.log(this.list_id);

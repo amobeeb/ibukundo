@@ -91,16 +91,16 @@
        <hr/>
     <v-slide-y-transition mode="out-in">
       <v-layout row align-left wrap ma-5>
-        <v-flex sm3 v-for="board in boards" :key="board.slug" pa-1>
-          <router-link v-bind:to="{ name: 'boards', params: {slug: board.slug }}">
+        <v-flex sm3 v-for="board in boards" :key="board.slug" pa-1>       
           <v-card raised >
-            
+               <router-link   v-bind:to="{ name: 'boards', params: {slug: board.slug }}">
             <v-card-title primary-title>
                 {{board.boardname}}
-            </v-card-title>
+            </v-card-title></router-link>
             <v-card-actions>
+              <v-btn  text @click="openmember"> <v-icon>group</v-icon> ADD MEMBERS</v-btn>
             </v-card-actions>
-          </v-card></router-link>
+          </v-card>
         </v-flex>
         <v-flex sm3 pa-2>
           <v-card width="300px" raised >
@@ -219,6 +219,23 @@
       </v-card>
        </v-dialog>
   </v-row>
+  <v-dialog v-model="addmember" scrollable max-width="370px">
+      <v-card>
+        <v-card-title>Add A Member to a Board</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text style="height: 200px;">
+  <v-row>
+    <v-col cols="12" sm="12"> <v-text-field outlined label="Member Email" ></v-text-field></v-col>
+     <v-btn color="blue darken-1" text @click="addmember=false">Check</v-btn>
+        </v-row>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-btn color="blue darken-1" text @click="addmember=false">Save</v-btn>
+          <v-btn color="red darken-1" text @click="addmember = false">Remove</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     </template>
 
     </v-container>
@@ -250,6 +267,7 @@ export default {
     bid:'',
     groupbid:'',
     username:'',
+    addmember:false,
     isloggedin:false,
     loading:false,
     currentUser:false,
@@ -271,7 +289,9 @@ export default {
     
   },
   methods:{
-
+    openmember(){
+      this.addmember=!this.addmember
+    },
     fetchdata(){
       var user =firebase.auth().currentUser;
       this.currentUser=firebase.auth().currentUser.email;
