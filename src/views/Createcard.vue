@@ -18,6 +18,7 @@
     </v-card-text>
 <v-card-actions>
   <v-btn color="primary" text @click="createCardUnderList">ADD</v-btn>
+    <v-btn color="primary" text @click="createCardUnderList">ADD</v-btn>
     </v-card-actions>
   </v-card>
   </v-flex>
