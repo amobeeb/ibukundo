@@ -7,7 +7,7 @@
       color="grey-lighten-4"
     >
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner</span></span>
+      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner {{  new Date() - new Date('2020-08-23') / (24 * 60 * 60 * 1000)  }}</span></span>
       <v-spacer></v-spacer>
        <v-tooltip bottom>
       <template v-slot:activator="{ on, attrs }">
@@ -319,6 +319,7 @@ components:{
       this.num = value;
       this.card_details=!this.card_details
     },
+
        fetchdata(){
             var user = firebase.auth().currentUser;
              db.collection('users').doc(user.uid).collection('boards').where('slug','==', this.$route.params.slug).get()
@@ -331,14 +332,17 @@ components:{
                  })
              })
         },
+
         startdraggingcard(card){
           console.log('started dragging',card);
           this.draggingcard=card;
         },
+
         setdroppinglist(event, list){
           this.droppinglist=list;
           event.preventDefault();
         },
+
         dropcard(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
@@ -357,6 +361,7 @@ components:{
         this.droppinglist=null;
         this.draggingcard=null;
         },
+        
         listTask(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
