@@ -15,86 +15,84 @@ import testing from '../views/testing.vue'
 
 Vue.use(VueRouter)
 export default new VueRouter({
-  mode:'history',
-  base:process.env.BASE_URL,
- routes : [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home,
-    meta:{
-      requiresGuest:true
-    }
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: About,
-    meta:{
-      requiresGuest:true
-    }
-  },
-  {
-    path: '/user',
-    name: 'user',
-    component: user,
-    meta:{
-      requiresAuth:true
-    }
-  },
-  {
-    path: '/notes',
-    name: 'notes',
-    component: note,
-    meta:{
-      requiresAuth:true
-    }
-  },
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes: [{
+            path: '/',
+            name: 'Home',
+            component: Home,
+            meta: {
+                requiresGuest: true
+            }
+        },
+        {
+            path: '/about',
+            name: 'About',
+            component: About,
+            meta: {
+                requiresGuest: true
+            }
+        },
+        {
+            path: '/user',
+            name: 'user',
+            component: user,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/notes',
+            name: 'notes',
+            component: note,
+            meta: {
+                requiresAuth: true
+            }
+        },
+
+        {
+            path: '/note/:note_id',
+            name: 'notedetails',
+            component: notedetails,
+            meta: {
+                requiresAuth: true
+            }
+        },
+
+        {
+            path: '/task/:task_id',
+            name: 'taskdetails',
+            component: taskdetails,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/board/:slug',
+            name: 'boards',
+            component: boards,
+            meta: {
+                requiresAuth: true
+            }
+        },
+        {
+            path: '/groupboard/:groupslug',
+            name: 'groupboards',
+            component: groupboards,
+            meta: {
+                requiresAuth: true
+            }
+        },
 
 
-
-  {
-    path: '/:task_id',
-    name: 'taskdetails',
-    component: taskdetails,
-    meta:{
-      requiresAuth:true
-    }
-  },
-  {
-    path: '/:slug',
-    name: 'boards',
-    component:boards,
-    meta:{
-      requiresAuth:true
-    }
-  },
-  {
-    path: '/:groupslug',
-    name: 'groupboards',
-    component:groupboards,
-    meta:{
-      requiresAuth:true
-    }
-  },
-
-{
-  path:'/:note_id',
-  name:'notedetails',
-  component:notedetails,
-  meta:{
-    requiresAuth:true
-  }
-},
-{
-  path:'/testing',
-  name:'testing',
-  component:testing,
-  meta:{
-    requiresAuth:true
-  }
-}  
-]
+        {
+            path: '/testing',
+            name: 'testing',
+            component: testing,
+            meta: {
+                requiresAuth: true
+            }
+        }
+    ]
 
 })
-

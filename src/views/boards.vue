@@ -7,7 +7,7 @@
       color="grey-lighten-4"
     >
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner {{  new Date() - new Date('2020-08-23') / (24 * 60 * 60 * 1000)  }}</span></span>
+      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner {{ set_reminder()   }}</span></span>
       <v-spacer></v-spacer>
        <v-tooltip bottom>
       <template v-slot:activator="{ on, attrs }">
@@ -89,6 +89,7 @@
     <v-container class="my-5" fluid>
       <div class="display-2"> {{boardname}} </div>
       <hr>
+      
     <v-layout>
       <v-flex xs9>
       <v-layout row wrap>
@@ -108,7 +109,10 @@
                   <v-layout row >
                     <v-flex xs12 class="pa-2">
                       <div color="grey-lighten-4">
-                <div class="subtitle text-capitalize" color="grey-lighten-4">{{card.cardname}} <v-spacer></v-spacer> </div>
+                <div class="subtitle text-capitalize" color="grey-lighten-4">{{card.cardname}} 
+                  <v-icon v-if="set_reminder()=='true'" class="red--text">info</v-icon>
+                     
+                  <v-spacer></v-spacer> </div>
          <v-icon small right @click="open_modal(card.cardname,card.card_id,card.Description)" > create</v-icon> 
                     </div>
                   
@@ -150,79 +154,7 @@
             </div>
           </v-card>
         </v-flex>
-      </v-layout>
-   
-   
-    <template>
-     <v-row justify="end" ma-2>
-       <v-dialog v-model="dialog" persistent max-width="600px">
-         <template v-slot:activator="{ on, attrs }">
-     <v-btn class="mx-2" fab dark color="indigo"
-      v-bind="attrs"
-      v-on="on"
-          >
-      <v-icon dark
-          >mdi-plus</v-icon>
-    </v-btn>
-         </template>
-          <v-card>
-        <v-card-title>
-          <span class="headline">ADD TASK</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12">
-                 
-                <v-text-field label="Title*" required v-model="title"></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-select
-                v-model="priority"
-                  :items="['High', 'Medium', 'Low']"
-                  label="Priority*"
-                  required
-                ></v-select>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-      <v-dialog
-        ref="dialog"
-        v-model="modal"
-        :return-value.sync="date"
-        persistent
-        width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-model="date"
-            label="Picker in dialog"
-            prepend-icon="event"
-            readonly
-            v-bind="attrs"
-            v-on="on"
-          ></v-text-field>
-        </template>
-        <v-date-picker v-model="date" scrollable>
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.dialog.save(date)">OK</v-btn>
-        </v-date-picker>
-      </v-dialog>
-    </v-col>
-            </v-row>
-          </v-container>
-          <small>*indicates required field</small>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="dialog = false">Close</v-btn>
-          <v-btn color="blue darken-1" text @click="addTask" :loading="loading">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-       </v-dialog>
-  </v-row>
-    </template>
-
+      </v-layout> 
     </v-container>
    
   </v-app>
@@ -329,11 +261,20 @@ components:{
     },
      
   methods:{
+
+    set_reminder(){
+      var days = (new Date() - new Date('2020-08-24')) / (24 * 60 * 60 * 1000);
+      if(days <= 3){
+        return 'true';
+      }
+      return 'false'
+    },
      open_modal(value,cid,cardDescription){
       this.num = value;
       this.cid = cid;
       this.cardDescription=cardDescription
       this.card_details=!this.card_details
+      //reload goes here
     },
 
        fetchdata(){
@@ -374,9 +315,6 @@ components:{
         this.droppinglist=null;
         this.draggingcard=null;
         },
-<<<<<<< HEAD
-        
-=======
         savedescriptionindb(){
           var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
@@ -385,7 +323,6 @@ components:{
            this.Description=""
            console.lo('check'+this.card_id,this.bid)
         },
->>>>>>> e89ee6293eec371ed05b5d387d88591b8b821ebd
         listTask(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
@@ -429,27 +366,7 @@ components:{
              })
            })  
         },
-        listCard(){
-           var user = firebase.auth().currentUser;
-           this.currentUser=firebase.auth().currentUser.email;
-           this.bid=this.$route.query.slug;
-           this.bid=this.$route.params.slug;
-           db.collection('users').doc(user.uid).collection('boards').
-           doc(this.bid).collection('cards').get().then(querySnapshot=>{
-             querySnapshot.forEach(doc=>{
-               const data={
-                 'id':doc.id,
-                 'cardname': doc.data().cardname,
-                 'card_id':doc.data().card_id
-                 
-               }
-              this.list_id=doc.data().list_id;
-               console.log(data);
-               console.log(this.list_id);
-               console.log(doc.data().slug);
-             })
-           })  
-        },
+       
          getCardUnderList(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
@@ -522,7 +439,8 @@ components:{
               this.createlistactivity(`${user.email} created list ${this.listname}`)
               this.listname=''
               this.lists.splice(0,this.lists.length)
-              this.getList() }
+              this.getList() 
+              }
           },
           createlistactivity(text){
              var user=firebase.auth().currentUser;
@@ -557,25 +475,7 @@ components:{
              })
            }) 
           },
-              createCardUnderList(){
-            var user=firebase.auth().currentUser;
-            this.card_id=this.generateUUID()
-            if(user &&this.cardname!=''){
               
-               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).collection('cards').doc(this.card_id)
-               .set({
-                cardname:this.cardname,
-                card_id:this.card_id,
-                list_id:this.list_id,
-                 board_id:this.bid
-              })
-              this.cardname=''
-              this.cards.splice(0,this.cards.length)
-             this.getCardUnderList();
-              
-              }
-              
-          },
 
           logout(){
             firebase.auth().signOut().then(()=>
