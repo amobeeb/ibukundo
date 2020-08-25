@@ -109,7 +109,7 @@
                     <v-flex xs12 class="pa-2">
                       <div color="grey-lighten-4">
                 <div class="subtitle text-capitalize" color="grey-lighten-4">{{card.cardname}} <v-spacer></v-spacer> </div>
-         <v-icon small right @click="open_modal(card.cardname)" > create</v-icon> 
+         <v-icon small right @click="open_modal(card.cardname,card.card_id,card.Description)" > create</v-icon> 
                     </div>
                   
                     </v-flex>
@@ -146,7 +146,7 @@
           <v-card class="ml-5" flat>
             <v-card-title>Activities</v-card-title>
             <div v-for="activity in activitiesbydate" :key="activity.activity_id">
-              <div class="subtitle pa-2" >{{activity.activitytext}}</div>
+              <div class="overline pa-2" >{{activity.activitytext}}</div>
             </div>
           </v-card>
         </v-flex>
@@ -227,10 +227,18 @@
    
   </v-app>
     <v-row justify="center">
-        <v-dialog v-model="card_details" persistent max-width="600px">
+        <v-dialog v-model="card_details" persistent max-width="800px">
            <v-card>
-        <v-card-title class="headline">{{num}}</v-card-title>
-        <v-card-text></v-card-text>
+        <v-card-title class="headline text-capitalize">{{num}} </v-card-title>        
+           <v-col cols="16"> <v-text-field label="Description" required v-model="Description" @click="savedescription=false" ></v-text-field>
+              </v-col>
+               {{cardDescription}}
+              <v-btn  color="green darken-1" text v-model="savedescription" :disabled="savedescription" @click="savedescriptionindb()">Save</v-btn>
+              <v-col cols="12"> <v-text-field label="Comment" required v-model="Comment" @click="savecomment=false"></v-text-field>
+              </v-col>
+               <v-btn color="blue darken-1" text v-model="savecomment" :disabled="savecomment">ADD</v-btn>
+        <v-card-text class="mt-4 mb-0">ADD TO CARD</v-card-text>
+        <v-btn large text mt-0 ><v-icon>person</v-icon>MEMBERS</v-btn>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="green darken-1" text @click="card_details = false">Close</v-btn>
@@ -262,6 +270,9 @@ components:{
     card_details:false,
     title:'',
     boardname:null,
+    Description:'',
+    Comment:'',
+    cardDescription:'',
     slug:'',
     priority:null,
     listname:'',
@@ -271,9 +282,12 @@ components:{
     cardname:'',
     card_id:'',
     num:'asa',
+    cid:'',
     activitytext:'',
     list_id:'',
     activity_id:'',
+    savedescription:true,
+    savecomment:true,
     due:null,
     username:'',
     isloggedin:false,
@@ -315,8 +329,10 @@ components:{
     },
      
   methods:{
-     open_modal(value){
+     open_modal(value,cid,cardDescription){
       this.num = value;
+      this.cid = cid;
+      this.cardDescription=cardDescription
       this.card_details=!this.card_details
     },
 
@@ -354,14 +370,22 @@ components:{
            this.createlistactivity(`${user.email} moved ${this.draggingcard.cardname} from ${fromlist.listname} to ${this.droppinglist.listname}`)
            console.log(this.draggingcard.list_id,this.droppinglist.slug )
              this.draggingcard.list_id=this.droppinglist.slug;
-            }
-      
-             
-        }
+            } }
         this.droppinglist=null;
         this.draggingcard=null;
         },
+<<<<<<< HEAD
         
+=======
+        savedescriptionindb(){
+          var user = firebase.auth().currentUser;
+           this.currentUser=firebase.auth().currentUser.email;
+            db.collection('users').doc(user.uid).collection('boards').doc(this.bid)
+           .collection('cards').doc(this.cid).update({Description: this.Description})
+           this.Description=""
+           console.lo('check'+this.card_id,this.bid)
+        },
+>>>>>>> e89ee6293eec371ed05b5d387d88591b8b821ebd
         listTask(){
            var user = firebase.auth().currentUser;
            this.currentUser=firebase.auth().currentUser.email;
@@ -439,7 +463,8 @@ components:{
                  'cardname': doc.data().cardname,
                  'card_id':doc.data().card_id,
                   'list_id':doc.data().list_id,
-                  'board_id':doc.data().board_id
+                  'board_id':doc.data().board_id,
+                  'Description':doc.data().Description
                }
               this.cards.push(data);
                 console.log(this.list_id);
