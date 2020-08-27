@@ -7,7 +7,7 @@
       color="grey-lighten-4"
     >
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner {{ set_reminder()   }}</span></span>
+      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner </span></span>
       <v-spacer></v-spacer>
        <v-tooltip bottom>
       <template v-slot:activator="{ on, attrs }">
@@ -553,7 +553,7 @@ components:{
   },
    created(){
           this.listTask();
-          this.listCard();
+         
          
   },
  
