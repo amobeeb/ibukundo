@@ -22,15 +22,7 @@
           </v-btn>
         </template>
 
-        <v-list>
-          <v-list-item
-            v-for="n in 5"
-            :key="n"
-            @click="() => {}"
-          >
-            <v-list-item-title>Option {{ n }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
+        
       </v-menu>
     </v-app-bar>
     <v-divider></v-divider>
@@ -138,7 +130,7 @@ export default {
        signin(){
        firebase.auth().signInWithEmailAndPassword(this.email,this.password).
        then(user=>{
-         alert(`You are Logged in as ${user.email}`);
+         console.log(`You are Logged in as ${user.email}`);
 
         this.$router.push('/user');
        },
