@@ -98,7 +98,7 @@
                 {{board.boardname}}
             </v-card-title></router-link>
             <v-card-actions>
-              <v-btn  text @click="openmember"> <v-icon>group</v-icon> ADD MEMBERS</v-btn>
+              <v-btn  text @click="openmember(board.slug)"> <v-icon>group</v-icon> ADD MEMBERS</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -225,8 +225,9 @@
         <v-divider></v-divider>
         <v-card-text style="height: 200px;">
   <v-row>
-    <v-col cols="12" sm="12"> <v-text-field outlined label="Member Email" ></v-text-field></v-col>
-     <v-btn color="blue darken-1" text @click="addmember=false">Check</v-btn>
+    <v-col cols="12" sm="12"> <v-text-field outlined label="Member Email" v-model="email_param" v-on:keyup="fetchUserdata(email_param)"></v-text-field></v-col>
+     <v-btn color="blue darken-1" text @click="fetchUserdata(email_param)">Check</v-btn>
+     {{susername}}
         </v-row>
         </v-card-text>
         <v-divider></v-divider>
@@ -254,6 +255,9 @@ export default {
 
   data(){
     return{
+      member_board_id :"",
+      email_param:'',
+      susername:'',
     drawer: false,
     dialog: false,
     title:'',
@@ -289,9 +293,21 @@ export default {
     
   },
   methods:{
-    openmember(){
+    openmember($value){
+      this.member_board_id = $value;
       this.addmember=!this.addmember
     },
+     fetchUserdata($value){
+            // var user = firebase.auth().currentUser;
+             db.collection('users').where('email','==', $value).get()
+             .then(querySnapshot=>{
+                 querySnapshot.forEach(doc=>{
+                     this.susername=doc.data().username 
+                     
+                 })
+             })
+            
+        },
     fetchdata(){
       var user =firebase.auth().currentUser;
       this.currentUser=firebase.auth().currentUser.email;
@@ -394,6 +410,9 @@ export default {
           update(){
 
           }
+  },
+  mounted(){
+    // this.fetchUserdata('alukoibk@icloud.com');
   },
   created(){
            this.fetchdata(); 
