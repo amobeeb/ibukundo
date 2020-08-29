@@ -98,7 +98,7 @@
                 {{board.boardname}}
             </v-card-title></router-link>
             <v-card-actions>
-              <v-btn  text @click="openmember(board.slug)"> <v-icon>group</v-icon> ADD MEMBERS</v-btn>
+              <v-btn  text @click="openmember(board.slug,board.boardname)"> <v-icon>group</v-icon> ADD MEMBERS</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -123,33 +123,19 @@
   <div text-lg-h6> <v-icon>group</v-icon>GROUP BOARDS</div>
   <hr/>
   <v-slide-y-transition mode="out-in">
-      <v-layout row align-left wrap>
-        <v-flex sm3 v-for="groupboard in groupboards" :key="groupboard.grouslug" pa-1>
-          <router-link v-bind:to="{ name: 'groupboards', params: {groupslug: groupboard.groupslug }}">
-          <v-card  raised >
+ <v-layout row align-left wrap ma-5>
+        <v-flex sm3 v-for="member in members" :key="member.member_id" pa-1>       
+          <v-card raised >
+               <router-link   v-bind:to="{ name: 'boards', params: {slug: member.board_id }}">
             <v-card-title primary-title>
-                {{groupboard.groupboardname}}
-            </v-card-title>
+                {{member.boardname}}
+            </v-card-title></router-link>
             <v-card-actions>
+              <v-btn  text @click="openmember(member.board_id,member.boardname)"> <v-icon>group</v-icon> ADD MEMBERS</v-btn>
             </v-card-actions>
-          </v-card></router-link>
-        </v-flex>
-         <v-flex sm3 pa-2>
-          <v-card width="300px" raised>
-            <v-card-title primary-title style="flex-direction:column">
-              <div class="headline">Create Group Boards</div>
-              <div><v-form>
-                <v-text-field v-model="groupboardname" title="name" required></v-text-field>
-              </v-form>
-              </div>
-            </v-card-title>
-            <v-card-actions>
-              <v-btn text color="secondary" class="ma-auto" @click="creategroupboard">Create</v-btn>
-            </v-card-actions>
-
           </v-card>
         </v-flex>
-        </v-layout>
+ </v-layout>
     </v-slide-y-transition>
     <template>
      <v-row justify="end" ma-2>
@@ -225,15 +211,18 @@
         <v-divider></v-divider>
         <v-card-text style="height: 200px;">
   <v-row>
-    <v-col cols="12" sm="12"> <v-text-field outlined label="Member Email" v-model="email_param" v-on:keyup="fetchUserdata(email_param)"></v-text-field></v-col>
-     <v-btn color="blue darken-1" text @click="fetchUserdata(email_param)">Check</v-btn>
-     {{susername}}
+     <v-col cols="12" sm="12"> <v-text-field outlined label="Member Email" v-model="email_param" v-on:keyup="fetchUserdata(email_param)"></v-text-field></v-col>
+       <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text >{{susername}}</v-btn>
+          <v-btn color="blue darken-1" text @click="addmembertodb()" :loading="loading" >ADD</v-btn>
+        </v-card-actions> 
+      
         </v-row>
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
-          <v-btn color="blue darken-1" text @click="addmember=false">Save</v-btn>
-          <v-btn color="red darken-1" text @click="addmember = false">Remove</v-btn>
+          <v-btn color="red darken-1" text @click="addmember = false">close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -265,15 +254,20 @@ export default {
     priority:null,
     boardname:'',
     groupboardname:'',
+    tempforbid:'',
+    temforbname:'',
     due:null,
     slug:null,
     groupslug:null,
     bid:'',
+    member_id:'',
     groupbid:'',
     username:'',
+    
     addmember:false,
     isloggedin:false,
     loading:false,
+    search:'',
     currentUser:false,
       date: new Date().toISOString().substr(0, 10),
       modal:false,
@@ -285,6 +279,7 @@ export default {
 
     tasks:[],
     boards:[],
+    members:[],
     groupboards:[],
     inprogresstasks:[],
     completedtasks:[],
@@ -293,12 +288,12 @@ export default {
     
   },
   methods:{
-    openmember($value){
-      this.member_board_id = $value;
+    openmember(tempforbid,temforbname){
       this.addmember=!this.addmember
+      this.tempforbid=tempforbid
+      this.temforbname=temforbname
     },
-     fetchUserdata($value){
-            // var user = firebase.auth().currentUser;
+    fetchUserdata($value){
              db.collection('users').where('email','==', $value).get()
              .then(querySnapshot=>{
                  querySnapshot.forEach(doc=>{
@@ -307,6 +302,22 @@ export default {
                  })
              })
             
+        },
+        addmembertodb(){
+            this.member_id=this.generateUUID()
+            var user=firebase.auth().currentUser;
+            if(user &&this.susername!=''){
+            db.collection('members').doc(this.member_id).set({
+                email:this.email_param,
+                board_id:this.tempforbid,
+                 member_id: this.member_id,
+                 username:this.susername,
+                 owner_id:user.uid,
+                 boardname:this.temforbname,
+                 
+              })
+              this.susername=''  
+            }
         },
     fetchdata(){
       var user =firebase.auth().currentUser;
@@ -323,18 +334,22 @@ export default {
         })
       })
     },
-    fetchgroupdata(){
+    fetchmembers(){
       var user =firebase.auth().currentUser;
       this.currentUser=firebase.auth().currentUser.email;
-      db.collection('users').doc(user.uid).collection('groupboards').orderBy('groupboardname').get().then(querySnapshot=>{
+      db.collection('members').where('email','==',user.email).get().then(querySnapshot=>{
         querySnapshot.forEach(doc=>{
           const data={
             'id':doc.id,
-            'groupboardname':doc.data().groupboardname,
-            'groupslug':doc.data().groupslug
+            'boardname':doc.data().boardname,
+            'board_id':doc.data().board_id,
+            'email':doc.data().email,
+            'member_id':doc.data.member_id,
+            'owner_id':doc.data.owner_id,
+            'username':doc.data.username
           }
-          this.groupboards.push(data);
-          console.log(doc.data().groupslug)
+          this.members.push(data);
+          console.log(doc.data())
         })
       })
     },
@@ -363,7 +378,8 @@ export default {
             if(user &&this.boardname!=''){
               db.collection('users').doc(user.uid).collection('boards').doc(this.bid).set({
                 boardname:this.boardname,
-                 slug: this.bid
+                 slug: this.bid,
+                 owner_id:user.uid
                  
               })
               this.boardname=''
@@ -416,7 +432,7 @@ export default {
   },
   created(){
            this.fetchdata(); 
-           this.fetchgroupdata();
+           this.fetchmembers();
   },
   
 };

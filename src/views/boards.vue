@@ -7,7 +7,7 @@
       color="grey-lighten-4"
     >
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner {{ set_reminder()   }}</span></span>
+      <span class="title ml-3 mr-5">I&nbsp;<span class="font-weight-light">Planner </span></span>
       <v-spacer></v-spacer>
        <v-tooltip bottom>
       <template v-slot:activator="{ on, attrs }">
@@ -86,13 +86,13 @@
         </template>
       </v-list>
     </v-navigation-drawer>
-    <v-container class="my-5" fluid>
+    <v-container class="my-5" fluid style="">
       <div class="display-2"> {{boardname}} </div>
       <hr>
       
-    <v-layout>
+    <v-layout style="overflow-x: scroll">
       <v-flex xs9>
-      <v-layout row wrap>
+      <v-layout>
         <v-flex sm3 v-for="list in lists" :key="list.listname" px-2 pt-5 >
           <v-card @dragover="setdroppinglist($event,list)" color="#043353" :class="{'green lighten-4':droppinglist==list}">
             <v-card-title primary-title color="primary">
@@ -110,7 +110,20 @@
                     <v-flex xs12 class="pa-2">
                       <div color="grey-lighten-4">
                 <div class="subtitle text-capitalize" color="grey-lighten-4">{{card.cardname}} <v-spacer></v-spacer> </div>
+
+            <v-tooltip bottom v-if="date_reminder(card.Duedate) == 'true'">
+            <template v-slot:activator="{ on, attrs }">
+              
+              <v-icon x-large color="red" v-bind="attrs"
+                v-on="on" >info</v-icon>
+            </template>
+            <span>Due Date: {{card.Duedate}}</span>
+          </v-tooltip>
+
+
          <v-icon small right @click="open_modal(card.cardname,card.card_id,card.Description,card.Duedate)" > create</v-icon> 
+
+         
                     </div>
                   
                     </v-flex>
@@ -126,7 +139,7 @@
           </v-card>
         </v-flex>
         <v-flex sm3 pa-2>
-          <v-card width="300px" mt-auto>
+          <v-card width="500px" mt-auto>
            <v-card-title primary-title style="flex-direction:column">
               <div class="headline">Create lists</div>
               <div><v-form>
@@ -140,17 +153,17 @@
 
           </v-card>
         </v-flex>
-
-      </v-layout>
-      </v-flex>
-        <v-flex xs3>
-          <v-card class="ml-5" flat>
+ <v-flex xs3>
+          <v-card class="" width="1000px">
             <v-card-title>Activities</v-card-title>
             <div v-for="activity in activitiesbydate" :key="activity.activity_id">
               <div class="overline pa-2" >{{activity.activitytext}}</div>
             </div>
           </v-card>
         </v-flex>
+      </v-layout>
+      </v-flex>
+       
       </v-layout> 
     </v-container>
    
@@ -291,6 +304,17 @@ components:{
     },
      
   methods:{
+    date_reminder($date_val){
+        var current_date = new Date();
+        var due_date = new Date($date_val);
+        var days = (due_date - current_date) / (24*3600*1000);
+        // console.log('Date is: '+( (due_date - current_date) / (24*3600*1000)))
+        if(days <= 3){
+          return 'true'
+        }
+        return 'false'
+    },
+
      open_modal(value,cid,cardDescription,duedate){
       this.num = value;
       this.cid = cid;
@@ -550,10 +574,11 @@ components:{
     this.getList();
     this.getCardUnderList();
     this.getlistactivity();
+    this.date_reminder()
   },
    created(){
           this.listTask();
-          this.listCard();
+         
          
   },
  
